@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "Car Maintenance",
+    "slug": "car-maintenance",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#121212"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.carmaintenance.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#121212"
+      },
+      "package": "com.carmaintenance.app",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "supabaseUrl": "https://dahijvkdrsmrgwvosyym.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhaGlqdmtkcnNtcmd3dm9zeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2MTUzOTUsImV4cCI6MjA1MjE5MTM5NX0.LGBx6NHxMUfJDTwfOp-aR5UvXmgMDxY9WBbbX99NKKg"
+    }
+  }
+}
