@@ -1,0 +1,20 @@
+{
+  "name": "car-maintenance-app",
+  "version": "1.0.0",
+  "description": "Application mobile de suivi d'entretien automobile",
+  "scripts": {
+    "start": "cd CarMaintenanceExpo && npm start",
+    "ios": "cd CarMaintenanceExpo && npm run ios",
+    "android": "cd CarMaintenanceExpo && npm run android",
+    "lint": "cd CarMaintenanceExpo && npm run lint",
+    "format": "cd CarMaintenanceExpo && npm run format",
+    "prepare": "husky"
+  },
+  "author": "Antonin Latinovic",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  }
+}

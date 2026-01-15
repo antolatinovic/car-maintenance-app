@@ -171,11 +171,36 @@ import { supabase } from '@/core/config/supabase';
 ## Commandes
 
 ```bash
+# Depuis la racine du projet
 npm start          # Demarrer Expo
 npm run ios        # Simulateur iOS
 npm run android    # Emulateur Android
-npm run web        # Navigateur
+npm run lint       # Verifier le code
+npm run format     # Formater le code
+
+# Depuis CarMaintenanceExpo/
+npm run lint:fix   # Corriger les erreurs ESLint
+npm run typecheck  # Verifier les types TypeScript
 ```
+
+## Outils de Qualite
+
+### ESLint + Prettier
+- Formatage automatique a la sauvegarde (VS Code)
+- Pre-commit hook via Husky (lint-staged)
+- Config: `.eslintrc.js` et `.prettierrc`
+
+### Variables d'Environnement
+- Fichier `.env` (non commite, contient les secrets)
+- Fichier `.env.example` (template a copier)
+- Utilisation:
+```typescript
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
+```
+
+### Alias d'Import
+- `@/` pointe vers `src/`
+- Exemple: `import { colors } from '@/core/theme';`
 
 ## Checklist Nouveau Composant
 
