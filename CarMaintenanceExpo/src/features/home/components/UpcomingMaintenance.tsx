@@ -1,15 +1,13 @@
 /**
- * Upcoming maintenance list component
+ * Upcoming maintenance list component - Modern light mode
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../core/theme/colors';
-import { spacing } from '../../../core/theme/spacing';
-import { typography } from '../../../core/theme/typography';
+import { colors, shadows, spacing, typography } from '../../../core/theme';
 import { Card } from '../../../shared/components/Card';
-import type { MaintenanceSchedule, MaintenanceCategory } from '../../../core/types/database';
+import type { MaintenanceCategory } from '../../../core/types/database';
 
 type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'upcoming' | 'optional';
 
@@ -33,18 +31,18 @@ const urgencyConfig: Record<UrgencyLevel, { color: string; label: string }> = {
   urgent: { color: colors.accentDanger, label: 'Urgent' },
   soon: { color: colors.accentWarning, label: 'Bientot' },
   upcoming: { color: colors.accentSuccess, label: 'Planifie' },
-  optional: { color: colors.textSecondary, label: 'Optionnel' },
+  optional: { color: colors.textTertiary, label: 'Optionnel' },
 };
 
 const categoryIcons: Record<MaintenanceCategory, keyof typeof Ionicons.glyphMap> = {
-  oil_change: 'water-outline',
-  brakes: 'disc-outline',
-  filters: 'filter-outline',
-  tires: 'ellipse-outline',
-  mechanical: 'cog-outline',
-  revision: 'checkmark-circle-outline',
-  ac: 'snow-outline',
-  custom: 'build-outline',
+  oil_change: 'water',
+  brakes: 'disc',
+  filters: 'filter',
+  tires: 'ellipse',
+  mechanical: 'cog',
+  revision: 'checkmark-circle',
+  ac: 'snow',
+  custom: 'build',
 };
 
 const MaintenanceRow: React.FC<{
@@ -62,7 +60,7 @@ const MaintenanceRow: React.FC<{
 
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
-      <View style={[styles.iconContainer, { backgroundColor: `${config.color}20` }]}>
+      <View style={[styles.iconContainer, { backgroundColor: `${config.color}15` }]}>
         <Ionicons name={icon} size={20} color={config.color} />
       </View>
 
@@ -71,20 +69,20 @@ const MaintenanceRow: React.FC<{
         <View style={styles.rowMeta}>
           {item.dueDate && (
             <View style={styles.metaItem}>
-              <Ionicons name="calendar-outline" size={12} color={colors.textSecondary} />
+              <Ionicons name="calendar-outline" size={12} color={colors.textTertiary} />
               <Text style={styles.metaText}>{formatDueDate(item.dueDate)}</Text>
             </View>
           )}
           {item.dueMileage && (
             <View style={styles.metaItem}>
-              <Ionicons name="speedometer-outline" size={12} color={colors.textSecondary} />
+              <Ionicons name="speedometer-outline" size={12} color={colors.textTertiary} />
               <Text style={styles.metaText}>{item.dueMileage.toLocaleString()} km</Text>
             </View>
           )}
         </View>
       </View>
 
-      <View style={[styles.badge, { backgroundColor: `${config.color}20` }]}>
+      <View style={[styles.badge, { backgroundColor: `${config.color}15` }]}>
         <Text style={[styles.badgeText, { color: config.color }]}>{config.label}</Text>
       </View>
     </TouchableOpacity>
@@ -102,12 +100,13 @@ export const UpcomingMaintenance: React.FC<UpcomingMaintenanceProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Prochaines Echeances</Text>
-        <TouchableOpacity onPress={onViewAllPress}>
+        <TouchableOpacity onPress={onViewAllPress} style={styles.viewAllButton}>
           <Text style={styles.viewAll}>Voir calendrier</Text>
+          <Ionicons name="arrow-forward" size={16} color={colors.accentPrimary} />
         </TouchableOpacity>
       </View>
 
-      <Card style={styles.card}>
+      <Card variant="elevated" style={styles.card}>
         {displayItems.length > 0 ? (
           displayItems.map((item, index) => (
             <React.Fragment key={item.id}>
@@ -117,7 +116,9 @@ export const UpcomingMaintenance: React.FC<UpcomingMaintenanceProps> = ({
           ))
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons name="checkmark-circle" size={40} color={colors.accentSuccess} />
+            <View style={styles.emptyIconContainer}>
+              <Ionicons name="checkmark-circle" size={40} color={colors.accentSuccess} />
+            </View>
             <Text style={styles.emptyText}>Aucune echeance a venir</Text>
             <Text style={styles.emptySubtext}>Votre vehicule est a jour!</Text>
           </View>
@@ -140,8 +141,13 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.textPrimary,
   },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
   viewAll: {
-    ...typography.caption,
+    ...typography.link,
     color: colors.accentPrimary,
   },
   card: {
@@ -151,13 +157,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.m,
+    padding: spacing.cardPadding,
     gap: spacing.m,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -166,7 +172,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   rowTitle: {
-    ...typography.bodyMedium,
+    ...typography.bodySemiBold,
     color: colors.textPrimary,
   },
   rowMeta: {
@@ -180,29 +186,37 @@ const styles = StyleSheet.create({
   },
   metaText: {
     ...typography.small,
-    color: colors.textSecondary,
+    color: colors.textTertiary,
   },
   badge: {
-    paddingHorizontal: spacing.s,
+    paddingHorizontal: spacing.m,
     paddingVertical: spacing.xs,
-    borderRadius: spacing.buttonRadius,
+    borderRadius: spacing.buttonRadiusSmall,
   },
   badgeText: {
-    ...typography.small,
-    fontWeight: '500',
+    ...typography.smallMedium,
+    fontWeight: '600',
   },
   divider: {
     height: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: spacing.m,
+    backgroundColor: colors.borderLight,
+    marginHorizontal: spacing.cardPadding,
   },
   emptyState: {
     alignItems: 'center',
     padding: spacing.xxl,
     gap: spacing.s,
   },
+  emptyIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: `${colors.accentSuccess}15`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   emptyText: {
-    ...typography.bodyMedium,
+    ...typography.bodySemiBold,
     color: colors.textPrimary,
     marginTop: spacing.s,
   },

@@ -1,6 +1,6 @@
 /**
  * Typography styles for CarMaintenance App
- * Based on PRD Section 6.1
+ * Modern bold typography
  */
 
 import { Platform, TextStyle } from 'react-native';
@@ -12,26 +12,28 @@ const fontFamily = Platform.select({
 });
 
 export const typography = {
-  // Headings
+  // Headings - Bolder and larger
   h1: {
     fontFamily,
-    fontSize: 28,
-    fontWeight: '700',
-    lineHeight: 34,
+    fontSize: 32,
+    fontWeight: '800',
+    lineHeight: 40,
+    letterSpacing: -0.5,
   } as TextStyle,
 
   h2: {
     fontFamily,
-    fontSize: 22,
-    fontWeight: '600',
-    lineHeight: 28,
+    fontSize: 26,
+    fontWeight: '700',
+    lineHeight: 32,
+    letterSpacing: -0.3,
   } as TextStyle,
 
   h3: {
     fontFamily,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
-    lineHeight: 24,
+    lineHeight: 26,
   } as TextStyle,
 
   // Body text
@@ -39,14 +41,21 @@ export const typography = {
     fontFamily,
     fontSize: 16,
     fontWeight: '400',
-    lineHeight: 22,
+    lineHeight: 24,
   } as TextStyle,
 
   bodyMedium: {
     fontFamily,
     fontSize: 16,
     fontWeight: '500',
-    lineHeight: 22,
+    lineHeight: 24,
+  } as TextStyle,
+
+  bodySemiBold: {
+    fontFamily,
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 24,
   } as TextStyle,
 
   // Captions
@@ -54,14 +63,21 @@ export const typography = {
     fontFamily,
     fontSize: 14,
     fontWeight: '400',
-    lineHeight: 18,
+    lineHeight: 20,
   } as TextStyle,
 
   captionMedium: {
     fontFamily,
     fontSize: 14,
     fontWeight: '500',
-    lineHeight: 18,
+    lineHeight: 20,
+  } as TextStyle,
+
+  captionSemiBold: {
+    fontFamily,
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
   } as TextStyle,
 
   // Small text
@@ -72,6 +88,28 @@ export const typography = {
     lineHeight: 16,
   } as TextStyle,
 
+  smallMedium: {
+    fontFamily,
+    fontSize: 12,
+    fontWeight: '500',
+    lineHeight: 16,
+  } as TextStyle,
+
+  // Large numbers (for stats, amounts)
+  number: {
+    fontFamily,
+    fontSize: 28,
+    fontWeight: '700',
+    lineHeight: 34,
+  } as TextStyle,
+
+  numberLarge: {
+    fontFamily,
+    fontSize: 36,
+    fontWeight: '800',
+    lineHeight: 44,
+  } as TextStyle,
+
   // Button text
   button: {
     fontFamily,
@@ -80,12 +118,27 @@ export const typography = {
     lineHeight: 20,
   } as TextStyle,
 
+  buttonSmall: {
+    fontFamily,
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 18,
+  } as TextStyle,
+
   // Tab bar labels
   tabLabel: {
     fontFamily,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '500',
-    lineHeight: 12,
+    lineHeight: 14,
+  } as TextStyle,
+
+  // Link text
+  link: {
+    fontFamily,
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 20,
   } as TextStyle,
 } as const;
 

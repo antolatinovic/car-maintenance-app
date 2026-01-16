@@ -1,13 +1,12 @@
 /**
- * Custom minimal TabBar component
+ * Premium TabBar with floating center button
  */
 
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../core/theme/colors';
-import { spacing } from '../../core/theme/spacing';
-import { typography } from '../../core/theme/typography';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, gradients, shadows, spacing, typography } from '../../core/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type TabItem = 'home' | 'documents' | 'assistant' | 'calendar' | 'settings';
@@ -19,10 +18,18 @@ interface TabConfig {
   iconActive: keyof typeof Ionicons.glyphMap;
 }
 
-const tabs: TabConfig[] = [
+// 4 tabs: 2 on left, 2 on right of center button
+const leftTabs: TabConfig[] = [
   { key: 'home', label: 'Accueil', icon: 'home-outline', iconActive: 'home' },
-  { key: 'documents', label: 'Documents', icon: 'document-text-outline', iconActive: 'document-text' },
-  { key: 'assistant', label: 'Assistant', icon: 'chatbubbles-outline', iconActive: 'chatbubbles' },
+  {
+    key: 'documents',
+    label: 'Documents',
+    icon: 'document-text-outline',
+    iconActive: 'document-text',
+  },
+];
+
+const rightTabs: TabConfig[] = [
   { key: 'calendar', label: 'Calendrier', icon: 'calendar-outline', iconActive: 'calendar' },
   { key: 'settings', label: 'Reglages', icon: 'settings-outline', iconActive: 'settings' },
 ];
@@ -30,41 +37,76 @@ const tabs: TabConfig[] = [
 interface TabBarProps {
   activeTab: TabItem;
   onTabPress: (tab: TabItem) => void;
+  onCenterPress: () => void;
 }
 
-export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabPress }) => {
+const TabButton: React.FC<{
+  tab: TabConfig;
+  isActive: boolean;
+  onPress: () => void;
+}> = ({ tab, isActive, onPress }) => (
+  <TouchableOpacity style={styles.tab} onPress={onPress} activeOpacity={0.7}>
+    <Ionicons
+      name={isActive ? tab.iconActive : tab.icon}
+      size={24}
+      color={isActive ? colors.accentPrimary : colors.textTertiary}
+    />
+    <Text style={[styles.label, { color: isActive ? colors.accentPrimary : colors.textTertiary }]}>
+      {tab.label}
+    </Text>
+    {isActive && <View style={styles.activeIndicator} />}
+  </TouchableOpacity>
+);
+
+export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabPress, onCenterPress }) => {
   const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom || spacing.s }]}>
       <View style={styles.tabBar}>
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <TouchableOpacity
+        {/* Left tabs */}
+        <View style={styles.tabGroup}>
+          {leftTabs.map(tab => (
+            <TabButton
               key={tab.key}
-              style={styles.tab}
+              tab={tab}
+              isActive={activeTab === tab.key}
               onPress={() => onTabPress(tab.key)}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name={isActive ? tab.iconActive : tab.icon}
-                size={spacing.iconMedium}
-                color={isActive ? colors.accentPrimary : colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.label,
-                  { color: isActive ? colors.accentPrimary : colors.textSecondary },
-                ]}
-              >
-                {tab.label}
-              </Text>
-              {isActive && <View style={styles.activeIndicator} />}
-            </TouchableOpacity>
-          );
-        })}
+            />
+          ))}
+        </View>
+
+        {/* Center button placeholder */}
+        <View style={styles.centerPlaceholder} />
+
+        {/* Right tabs */}
+        <View style={styles.tabGroup}>
+          {rightTabs.map(tab => (
+            <TabButton
+              key={tab.key}
+              tab={tab}
+              isActive={activeTab === tab.key}
+              onPress={() => onTabPress(tab.key)}
+            />
+          ))}
+        </View>
       </View>
+
+      {/* Floating center button */}
+      <TouchableOpacity
+        style={styles.centerButtonContainer}
+        onPress={onCenterPress}
+        activeOpacity={0.8}
+      >
+        <LinearGradient
+          colors={gradients.violet}
+          style={styles.centerButton}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Ionicons name="add" size={32} color={colors.textOnColor} />
+        </LinearGradient>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -75,22 +117,29 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: spacing.tabBarMargin,
-    paddingTop: spacing.s,
-    backgroundColor: colors.backgroundPrimary,
+    alignItems: 'center',
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: colors.backgroundSecondary,
-    borderRadius: spacing.tabBarRadius,
-    paddingVertical: spacing.s,
-    paddingHorizontal: spacing.s,
+    backgroundColor: colors.cardBackground,
+    borderTopLeftRadius: spacing.tabBarRadius,
+    borderTopRightRadius: spacing.tabBarRadius,
+    paddingTop: spacing.m,
+    paddingBottom: spacing.s,
+    paddingHorizontal: spacing.l,
+    width: '100%',
+    ...shadows.large,
+  },
+  tabGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
   tab: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.xs,
+    minWidth: 60,
   },
   label: {
     ...typography.tabLabel,
@@ -98,10 +147,26 @@ const styles = StyleSheet.create({
   },
   activeIndicator: {
     position: 'absolute',
-    bottom: -spacing.xs,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    bottom: -4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: colors.accentPrimary,
+  },
+  centerPlaceholder: {
+    width: spacing.fabSize + spacing.l,
+  },
+  centerButtonContainer: {
+    position: 'absolute',
+    top: -spacing.fabSize / 2 + spacing.s,
+    alignSelf: 'center',
+    ...shadows.large,
+  },
+  centerButton: {
+    width: spacing.fabSize,
+    height: spacing.fabSize,
+    borderRadius: spacing.fabSize / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

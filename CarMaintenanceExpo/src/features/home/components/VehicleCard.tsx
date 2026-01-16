@@ -1,14 +1,12 @@
 /**
- * Vehicle hero card component
+ * Vehicle hero card component - Modern light mode design
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../../core/theme/colors';
-import { spacing } from '../../../core/theme/spacing';
-import { typography } from '../../../core/theme/typography';
+import { colors, gradients, shadows, spacing, typography } from '../../../core/theme';
 import type { Vehicle, FuelType } from '../../../core/types/database';
 
 interface VehicleCardProps {
@@ -26,10 +24,10 @@ const fuelTypeLabels: Record<FuelType, string> = {
 };
 
 const fuelTypeIcons: Record<FuelType, keyof typeof Ionicons.glyphMap> = {
-  gasoline: 'water-outline',
-  diesel: 'water-outline',
-  electric: 'flash-outline',
-  hybrid: 'leaf-outline',
+  gasoline: 'water',
+  diesel: 'water',
+  electric: 'flash',
+  hybrid: 'leaf',
 };
 
 export const VehicleCard: React.FC<VehicleCardProps> = ({
@@ -39,157 +37,191 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
   onQuickAction,
 }) => {
   const formatMileage = (km?: number | null) => {
-    if (!km) return '-- km';
-    return `${km.toLocaleString('fr-FR')} km`;
+    if (!km) return '--';
+    return km.toLocaleString('fr-FR');
   };
 
   const fuelLabel = vehicle.fuel_type ? fuelTypeLabels[vehicle.fuel_type] : '--';
-  const fuelIcon = vehicle.fuel_type ? fuelTypeIcons[vehicle.fuel_type] : 'help-outline';
+  const fuelIcon = vehicle.fuel_type ? fuelTypeIcons[vehicle.fuel_type] : 'help';
 
   const defaultImage = 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=800';
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.95}>
-      <ImageBackground
-        source={{ uri: vehicle.photo_url || defaultImage }}
-        style={styles.imageBackground}
-        imageStyle={styles.image}
+      {/* Header with gradient */}
+      <LinearGradient
+        colors={gradients.violet}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
       >
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
-          style={styles.gradient}
-        >
-          {/* Edit button */}
-          <TouchableOpacity style={styles.editButton} onPress={onEditPress}>
-            <Ionicons name="pencil" size={16} color={colors.textPrimary} />
-          </TouchableOpacity>
-
-          {/* Vehicle info */}
-          <View style={styles.infoContainer}>
+        <View style={styles.headerContent}>
+          <View>
             <Text style={styles.vehicleName}>
               {vehicle.brand} {vehicle.model}
             </Text>
-
-            <View style={styles.detailsRow}>
-              {/* Mileage */}
-              <View style={styles.detailItem}>
-                <Ionicons name="speedometer-outline" size={16} color={colors.accentPrimary} />
-                <Text style={styles.detailText}>{formatMileage(vehicle.current_mileage)}</Text>
-              </View>
-
-              {/* Fuel type */}
-              <View style={styles.detailItem}>
-                <Ionicons name={fuelIcon} size={16} color={colors.accentSuccess} />
-                <Text style={styles.detailText}>{fuelLabel}</Text>
-              </View>
-
-              {/* Year */}
-              {vehicle.year && (
-                <View style={styles.detailItem}>
-                  <Ionicons name="calendar-outline" size={16} color={colors.accentWarning} />
-                  <Text style={styles.detailText}>{vehicle.year}</Text>
-                </View>
-              )}
-            </View>
-
-            {/* Quick actions */}
-            <View style={styles.quickActions}>
-              <TouchableOpacity
-                style={styles.quickActionButton}
-                onPress={() => onQuickAction?.('details')}
-              >
-                <Ionicons name="information-circle-outline" size={18} color={colors.textPrimary} />
-                <Text style={styles.quickActionText}>Details</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.quickActionButton}
-                onPress={() => onQuickAction?.('mileage')}
-              >
-                <Ionicons name="speedometer-outline" size={18} color={colors.textPrimary} />
-                <Text style={styles.quickActionText}>Kilometrage</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.quickActionButton}
-                onPress={() => onQuickAction?.('more')}
-              >
-                <Ionicons name="ellipsis-horizontal" size={18} color={colors.textPrimary} />
-                <Text style={styles.quickActionText}>Plus</Text>
-              </TouchableOpacity>
-            </View>
+            {vehicle.registration_plate && (
+              <Text style={styles.licensePlate}>{vehicle.registration_plate}</Text>
+            )}
           </View>
-        </LinearGradient>
-      </ImageBackground>
+
+          <TouchableOpacity style={styles.editButton} onPress={onEditPress}>
+            <Ionicons name="pencil" size={18} color={colors.accentPrimary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Vehicle image */}
+        <Image
+          source={{ uri: vehicle.photo_url || defaultImage }}
+          style={styles.vehicleImage}
+          resizeMode="cover"
+        />
+      </LinearGradient>
+
+      {/* Stats row */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: `${colors.accentPrimary}15` }]}>
+            <Ionicons name="speedometer" size={20} color={colors.accentPrimary} />
+          </View>
+          <Text style={styles.statValue}>{formatMileage(vehicle.current_mileage)}</Text>
+          <Text style={styles.statLabel}>km</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: `${colors.accentSuccess}15` }]}>
+            <Ionicons name={fuelIcon} size={20} color={colors.accentSuccess} />
+          </View>
+          <Text style={styles.statValue}>{fuelLabel}</Text>
+          <Text style={styles.statLabel}>Carburant</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <View style={[styles.statIcon, { backgroundColor: `${colors.accentWarning}15` }]}>
+            <Ionicons name="calendar" size={20} color={colors.accentWarning} />
+          </View>
+          <Text style={styles.statValue}>{vehicle.year || '--'}</Text>
+          <Text style={styles.statLabel}>Annee</Text>
+        </View>
+      </View>
+
+      {/* Quick actions */}
+      <View style={styles.actionsContainer}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => onQuickAction?.('details')}>
+          <Ionicons name="information-circle-outline" size={20} color={colors.accentPrimary} />
+          <Text style={styles.actionText}>Details</Text>
+        </TouchableOpacity>
+
+        <View style={styles.actionDivider} />
+
+        <TouchableOpacity style={styles.actionButton} onPress={() => onQuickAction?.('mileage')}>
+          <Ionicons name="speedometer-outline" size={20} color={colors.accentPrimary} />
+          <Text style={styles.actionText}>Kilometrage</Text>
+        </TouchableOpacity>
+
+        <View style={styles.actionDivider} />
+
+        <TouchableOpacity style={styles.actionButton} onPress={() => onQuickAction?.('more')}>
+          <Ionicons name="ellipsis-horizontal" size={20} color={colors.accentPrimary} />
+          <Text style={styles.actionText}>Plus</Text>
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: colors.cardBackground,
     borderRadius: spacing.cardRadius,
     overflow: 'hidden',
-    backgroundColor: colors.cardBackground,
+    ...shadows.medium,
   },
-  imageBackground: {
-    height: 220,
-  },
-  image: {
-    borderRadius: spacing.cardRadius,
-  },
-  gradient: {
-    flex: 1,
-    justifyContent: 'flex-end',
+  header: {
     padding: spacing.cardPadding,
+    paddingBottom: 80,
   },
-  editButton: {
-    position: 'absolute',
-    top: spacing.m,
-    right: spacing.m,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoContainer: {
-    gap: spacing.s,
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   vehicleName: {
     ...typography.h2,
+    color: colors.textOnColor,
+  },
+  licensePlate: {
+    ...typography.captionMedium,
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: spacing.xs,
+  },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.cardBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.small,
+  },
+  vehicleImage: {
+    position: 'absolute',
+    bottom: -40,
+    right: spacing.l,
+    width: 180,
+    height: 100,
+    borderRadius: spacing.cardRadiusSmall,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.cardPadding,
+    paddingTop: spacing.xxl,
+    paddingBottom: spacing.m,
+    gap: spacing.m,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.m,
+    backgroundColor: colors.backgroundTertiary,
+    borderRadius: spacing.cardRadiusSmall,
+  },
+  statIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.s,
+  },
+  statValue: {
+    ...typography.bodySemiBold,
     color: colors.textPrimary,
   },
-  detailsRow: {
+  statLabel: {
+    ...typography.small,
+    color: colors.textTertiary,
+    marginTop: 2,
+  },
+  actionsContainer: {
     flexDirection: 'row',
-    gap: spacing.l,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  detailText: {
-    ...typography.caption,
-    color: colors.textSecondary,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    marginTop: spacing.m,
-    gap: spacing.s,
-  },
-  quickActionButton: {
+  actionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.s,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: spacing.buttonRadius,
+    paddingVertical: spacing.m,
+    gap: spacing.s,
   },
-  quickActionText: {
-    ...typography.small,
-    color: colors.textPrimary,
+  actionText: {
+    ...typography.captionSemiBold,
+    color: colors.accentPrimary,
+  },
+  actionDivider: {
+    width: 1,
+    backgroundColor: colors.border,
   },
 });
