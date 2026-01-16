@@ -10,6 +10,8 @@ import { TabBar, TabItem, PlaceholderScreen } from './src/shared/components';
 import { HomeScreen } from './src/features/home/HomeScreen';
 import { LoginScreen, SignupScreen, useAuth } from './src/features/auth';
 import { VehicleFormScreen } from './src/features/vehicle';
+import { DocumentsScreen } from './src/features/documents';
+import { CalendarScreen } from './src/features/calendar';
 
 type AuthScreen = 'login' | 'signup';
 
@@ -87,21 +89,9 @@ export default function App() {
           <HomeScreen key={refreshKey} userProfile={profile} onAddVehicle={handleAddVehicle} />
         );
       case 'documents':
-        return (
-          <PlaceholderScreen
-            title="Documents"
-            icon="document-text"
-            description="Scanner et gerer vos factures d'entretien"
-          />
-        );
+        return <DocumentsScreen />;
       case 'calendar':
-        return (
-          <PlaceholderScreen
-            title="Calendrier"
-            icon="calendar"
-            description="Planifiez et suivez vos maintenances"
-          />
-        );
+        return <CalendarScreen />;
       case 'settings':
         return (
           <PlaceholderScreen
