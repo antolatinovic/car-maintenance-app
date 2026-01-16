@@ -28,9 +28,16 @@ import type { BudgetCategory } from './components/BudgetCard';
 interface HomeScreenProps {
   userProfile?: Profile | null;
   onAddVehicle?: () => void;
+  onSettingsPress?: () => void;
+  onAnalyticsPress?: () => void;
 }
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({ userProfile, onAddVehicle }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({
+  userProfile,
+  onAddVehicle,
+  onSettingsPress,
+  onAnalyticsPress,
+}) => {
   const insets = useSafeAreaInsets();
   const { vehicle, budgets, maintenances, isLoading, refresh } = useHomeData();
 
@@ -90,7 +97,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userProfile, onAddVehicl
   };
 
   const handleViewAllBudgets = () => {
-    console.log('View all budgets');
+    onAnalyticsPress?.();
   };
 
   const handleBudgetPress = (category: BudgetCategory) => {
@@ -127,6 +134,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userProfile, onAddVehicl
             notificationCount={0}
             onNotificationPress={handleNotificationPress}
             onAvatarPress={handleAvatarPress}
+            onSettingsPress={onSettingsPress}
           />
           <View style={[styles.emptyState, { marginTop: spacing.xxxl * 2 }]}>
             <View style={styles.emptyIconContainer}>
@@ -183,6 +191,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ userProfile, onAddVehicl
           notificationCount={2}
           onNotificationPress={handleNotificationPress}
           onAvatarPress={handleAvatarPress}
+          onSettingsPress={onSettingsPress}
         />
 
         {/* Vehicle Card */}

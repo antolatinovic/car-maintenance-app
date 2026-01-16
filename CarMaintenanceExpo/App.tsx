@@ -13,7 +13,9 @@ import { VehicleFormScreen } from './src/features/vehicle';
 import { DocumentsScreen } from './src/features/documents';
 import { CalendarScreen } from './src/features/calendar';
 import { SettingsScreen } from './src/features/settings';
+import { ExpensesScreen } from './src/features/expenses';
 import { AssistantScreen } from './src/features/assistant';
+import { AnalyticsScreen } from './src/features/analytics';
 
 type AuthScreen = 'login' | 'signup';
 
@@ -22,6 +24,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabItem>('home');
   const [authScreen, setAuthScreen] = useState<AuthScreen>('login');
   const [showVehicleForm, setShowVehicleForm] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleAddVehicle = useCallback(() => {
@@ -39,6 +43,22 @@ export default function App() {
 
   const handleCenterPress = useCallback(() => {
     setActiveTab('home');
+  }, []);
+
+  const handleSettingsPress = useCallback(() => {
+    setShowSettings(true);
+  }, []);
+
+  const handleSettingsClose = useCallback(() => {
+    setShowSettings(false);
+  }, []);
+
+  const handleAnalyticsPress = useCallback(() => {
+    setShowAnalytics(true);
+  }, []);
+
+  const handleAnalyticsClose = useCallback(() => {
+    setShowAnalytics(false);
   }, []);
 
   // Loading state while checking auth
@@ -87,24 +107,54 @@ export default function App() {
     );
   }
 
+  // Settings screen modal
+  if (showSettings) {
+    return (
+      <SafeAreaProvider>
+        <SettingsScreen onClose={handleSettingsClose} />
+      </SafeAreaProvider>
+    );
+  }
+
+  // Analytics screen modal
+  if (showAnalytics) {
+    return (
+      <SafeAreaProvider>
+        <AnalyticsScreen onClose={handleAnalyticsClose} />
+      </SafeAreaProvider>
+    );
+  }
+
   // Main app
   const renderScreen = () => {
     switch (activeTab) {
       case 'home':
         return (
-          <HomeScreen key={refreshKey} userProfile={profile} onAddVehicle={handleAddVehicle} />
+          <HomeScreen
+            key={refreshKey}
+            userProfile={profile}
+            onAddVehicle={handleAddVehicle}
+            onSettingsPress={handleSettingsPress}
+            onAnalyticsPress={handleAnalyticsPress}
+          />
         );
       case 'documents':
         return <DocumentsScreen />;
       case 'calendar':
         return <CalendarScreen />;
-      case 'settings':
-        return <SettingsScreen />;
       case 'assistant':
         return <AssistantScreen />;
+      case 'expenses':
+        return <ExpensesScreen onAnalyticsPress={handleAnalyticsPress} />;
       default:
         return (
-          <HomeScreen key={refreshKey} userProfile={profile} onAddVehicle={handleAddVehicle} />
+          <HomeScreen
+            key={refreshKey}
+            userProfile={profile}
+            onAddVehicle={handleAddVehicle}
+            onSettingsPress={handleSettingsPress}
+            onAnalyticsPress={handleAnalyticsPress}
+          />
         );
     }
   };
