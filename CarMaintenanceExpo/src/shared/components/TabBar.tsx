@@ -20,7 +20,12 @@ interface TabConfig {
 
 // 4 tabs: 2 on left, 2 on right of center button
 const leftTabs: TabConfig[] = [
-  { key: 'home', label: 'Accueil', icon: 'home-outline', iconActive: 'home' },
+  {
+    key: 'assistant',
+    label: 'Assistant',
+    icon: 'chatbubble-ellipses-outline',
+    iconActive: 'chatbubble-ellipses',
+  },
   {
     key: 'documents',
     label: 'Documents',
@@ -92,19 +97,19 @@ export const TabBar: React.FC<TabBarProps> = ({ activeTab, onTabPress, onCenterP
         </View>
       </View>
 
-      {/* Floating center button */}
+      {/* Floating center button - Home */}
       <TouchableOpacity
         style={styles.centerButtonContainer}
         onPress={onCenterPress}
         activeOpacity={0.8}
       >
         <LinearGradient
-          colors={gradients.violet}
+          colors={activeTab === 'home' ? gradients.violet : gradients.purple}
           style={styles.centerButton}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Ionicons name="add" size={32} color={colors.textOnColor} />
+          <Ionicons name="car-sport" size={26} color={colors.textOnColor} />
         </LinearGradient>
       </TouchableOpacity>
     </View>

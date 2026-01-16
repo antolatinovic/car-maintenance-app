@@ -6,12 +6,14 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from './src/core/theme/colors';
-import { TabBar, TabItem, PlaceholderScreen } from './src/shared/components';
+import { TabBar, TabItem } from './src/shared/components';
 import { HomeScreen } from './src/features/home/HomeScreen';
 import { LoginScreen, SignupScreen, useAuth } from './src/features/auth';
 import { VehicleFormScreen } from './src/features/vehicle';
 import { DocumentsScreen } from './src/features/documents';
 import { CalendarScreen } from './src/features/calendar';
+import { SettingsScreen } from './src/features/settings';
+import { AssistantScreen } from './src/features/assistant';
 
 type AuthScreen = 'login' | 'signup';
 
@@ -33,6 +35,10 @@ export default function App() {
 
   const handleVehicleFormCancel = useCallback(() => {
     setShowVehicleForm(false);
+  }, []);
+
+  const handleCenterPress = useCallback(() => {
+    setActiveTab('home');
   }, []);
 
   // Loading state while checking auth
@@ -93,13 +99,9 @@ export default function App() {
       case 'calendar':
         return <CalendarScreen />;
       case 'settings':
-        return (
-          <PlaceholderScreen
-            title="Reglages"
-            icon="settings"
-            description="Personnalisez votre application"
-          />
-        );
+        return <SettingsScreen />;
+      case 'assistant':
+        return <AssistantScreen />;
       default:
         return (
           <HomeScreen key={refreshKey} userProfile={profile} onAddVehicle={handleAddVehicle} />
@@ -115,8 +117,8 @@ export default function App() {
         {/* Main content */}
         {renderScreen()}
 
-        {/* Custom Tab Bar with center + button */}
-        <TabBar activeTab={activeTab} onTabPress={setActiveTab} onCenterPress={handleAddVehicle} />
+        {/* Custom Tab Bar with center assistant button */}
+        <TabBar activeTab={activeTab} onTabPress={setActiveTab} onCenterPress={handleCenterPress} />
       </View>
     </SafeAreaProvider>
   );
