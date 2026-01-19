@@ -47,7 +47,9 @@ npm start
 | `npm start` | Demarre le serveur Expo |
 | `npm run ios` | Lance sur simulateur iOS |
 | `npm run android` | Lance sur emulateur Android |
-| `npm run web` | Lance sur navigateur web |
+| `npm run lint` | Verifie le code avec ESLint |
+| `npm run lint:fix` | Corrige les erreurs ESLint |
+| `npm run typecheck` | Verifie les types TypeScript |
 
 ## Structure du projet
 
@@ -55,16 +57,29 @@ npm start
 Mobile App car/
 ├── CarMaintenanceExpo/     # Application React Native (principal)
 │   ├── src/
-│   │   ├── core/           # Config, theme, types
-│   │   ├── features/       # Ecrans et composants par feature
+│   │   ├── core/           # Config, theme, types, utils
+│   │   │   ├── config/     # Supabase, API configs
+│   │   │   ├── theme/      # colors, spacing, typography
+│   │   │   ├── types/      # Types TypeScript centralises
+│   │   │   └── utils/      # Utilitaires (cache, etc.)
+│   │   ├── features/       # Modules fonctionnels
+│   │   │   ├── home/       # Ecran d'accueil
+│   │   │   ├── vehicle/    # Formulaire vehicule
+│   │   │   ├── calendar/   # Calendrier maintenances
+│   │   │   ├── expenses/   # Suivi depenses
+│   │   │   ├── documents/  # Gestion documents
+│   │   │   ├── analytics/  # Statistiques
+│   │   │   ├── assistant/  # Assistant IA
+│   │   │   ├── settings/   # Parametres
+│   │   │   └── auth/       # Authentification
 │   │   ├── shared/         # Composants reutilisables
+│   │   ├── services/       # Logique metier, appels API
 │   │   └── navigation/     # Configuration navigation
 │   ├── App.tsx             # Point d'entree
 │   └── package.json
 │
-├── CarMaintenanceApp/      # Version SwiftUI (iOS natif)
-├── supabase/               # Schema de base de donnees
-├── PRD/                    # Documentation produit
+├── supabase/               # Schema et Edge Functions
+├── CLAUDE.md               # Guide de developpement (conventions)
 └── setup.sh                # Script de setup automatique
 ```
 

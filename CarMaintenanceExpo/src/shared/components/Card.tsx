@@ -1,32 +1,29 @@
 /**
- * Reusable Card component
+ * Reusable Card component with modern light mode styling
  */
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
-import { colors } from '../../core/theme/colors';
-import { spacing } from '../../core/theme/spacing';
+import { colors, shadows, spacing } from '@/core/theme';
 
 interface CardProps {
   children: React.ReactNode;
   style?: ViewStyle;
   onPress?: () => void;
-  variant?: 'default' | 'elevated';
+  variant?: 'default' | 'elevated' | 'outlined';
 }
 
 export const Card: React.FC<CardProps> = ({ children, style, onPress, variant = 'default' }) => {
   const cardStyle = [
     styles.card,
     variant === 'elevated' && styles.elevated,
+    variant === 'outlined' && styles.outlined,
     style,
   ];
 
   if (onPress) {
     return (
-      <Pressable
-        onPress={onPress}
-        style={({ pressed }) => [cardStyle, pressed && styles.pressed]}
-      >
+      <Pressable onPress={onPress} style={({ pressed }) => [cardStyle, pressed && styles.pressed]}>
         {children}
       </Pressable>
     );
@@ -40,13 +37,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cardBackground,
     borderRadius: spacing.cardRadius,
     padding: spacing.cardPadding,
+    ...shadows.small,
   },
   elevated: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    ...shadows.medium,
+  },
+  outlined: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   pressed: {
     opacity: 0.9,

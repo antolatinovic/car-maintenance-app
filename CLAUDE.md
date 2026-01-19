@@ -10,18 +10,25 @@ CarMaintenanceExpo/
 │   ├── core/                 # Configuration et theme centralises
 │   │   ├── config/          # Supabase, API configs
 │   │   ├── theme/           # colors, spacing, typography
-│   │   └── types/           # Types TypeScript
+│   │   ├── types/           # Types TypeScript centralises
+│   │   │   ├── index.ts     # Export centralise
+│   │   │   ├── database.ts  # Types Supabase
+│   │   │   ├── analytics.ts # Types analytics
+│   │   │   └── carQuery.ts  # Types CarQuery API
+│   │   └── utils/           # Utilitaires reutilisables
+│   │       ├── index.ts
+│   │       └── cache.ts     # Cache AsyncStorage generique
 │   │
 │   ├── features/            # Modules fonctionnels (1 dossier = 1 feature)
-│   │   ├── home/
-│   │   │   ├── HomeScreen.tsx
-│   │   │   ├── components/  # Composants specifiques a la feature
-│   │   │   ├── hooks/       # Custom hooks de la feature
-│   │   │   └── index.ts
-│   │   ├── documents/       # (a implementer)
-│   │   ├── assistant/       # (a implementer)
-│   │   ├── calendar/        # (a implementer)
-│   │   └── settings/        # (a implementer)
+│   │   ├── home/            # Ecran d'accueil
+│   │   ├── vehicle/         # Formulaire vehicule
+│   │   ├── documents/       # Gestion documents
+│   │   ├── assistant/       # Assistant IA
+│   │   ├── calendar/        # Calendrier maintenances
+│   │   ├── expenses/        # Suivi depenses
+│   │   ├── analytics/       # Statistiques
+│   │   ├── settings/        # Parametres
+│   │   └── auth/            # Authentification
 │   │
 │   ├── shared/              # Composants reutilisables
 │   │   └── components/
@@ -29,6 +36,12 @@ CarMaintenanceExpo/
 │   ├── navigation/          # Configuration React Navigation
 │   │
 │   └── services/            # Logique metier, appels API
+│       ├── index.ts         # Export centralise
+│       ├── vehicleService.ts
+│       ├── maintenanceService.ts
+│       ├── expenseService.ts
+│       ├── documentService.ts
+│       └── carQueryService.ts  # API externe marques/modeles
 │
 ├── App.tsx                  # Point d'entree
 └── app.json                 # Config Expo
@@ -119,10 +132,22 @@ features/nom-feature/
 Ordre des imports :
 1. React / React Native
 2. Bibliotheques externes (Expo, etc.)
-3. Core (theme, config, types)
-4. Shared components
-5. Feature components
-6. Types locaux
+3. Core (theme, config, types, utils)
+4. Services
+5. Shared components
+6. Feature components
+7. Types locaux
+
+```typescript
+// Exemple d'imports
+import React from 'react';
+import { View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, spacing } from '@/core/theme';
+import type { CarMake } from '@/core/types';
+import { getCached, setCache } from '@/core/utils';
+import { getMakes } from '@/services/carQueryService';
+```
 
 ### Gestion d'Etat
 - useState pour etat local simple
@@ -200,7 +225,51 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
 
 ### Alias d'Import
 - `@/` pointe vers `src/`
-- Exemple: `import { colors } from '@/core/theme';`
+- Exemples:
+```typescript
+import { colors } from '@/core/theme';
+import type { Vehicle } from '@/core/types';
+import { getCached } from '@/core/utils';
+import { getMakes } from '@/services/carQueryService';
+```
+
+## Utilitaires (core/utils)
+
+### Cache (cache.ts)
+Utilitaire generique pour le cache AsyncStorage avec versioning.
+
+```typescript
+import { getCached, setCache, CACHE_DURATIONS } from '@/core/utils';
+
+// Lire depuis le cache (retourne null si expire ou absent)
+const data = await getCached<MyType>('cache_key', CACHE_DURATIONS.WEEK);
+
+// Ecrire dans le cache
+await setCache('cache_key', myData);
+
+// Durees predefinies
+CACHE_DURATIONS.SHORT   // 5 minutes
+CACHE_DURATIONS.MEDIUM  // 1 heure
+CACHE_DURATIONS.LONG    // 1 jour
+CACHE_DURATIONS.WEEK    // 7 jours
+```
+
+## APIs Externes
+
+### CarQuery API (carQueryService.ts)
+API gratuite pour recuperer les marques et modeles de vehicules.
+
+```typescript
+import { getMakes, getModels } from '@/services/carQueryService';
+
+// Toutes les marques (cachees 7 jours)
+const makes = await getMakes();
+
+// Modeles d'une marque (caches 7 jours)
+const models = await getModels('peugeot');
+```
+
+Les marques populaires francaises sont affichees en priorite.
 
 ## Checklist Nouveau Composant
 
