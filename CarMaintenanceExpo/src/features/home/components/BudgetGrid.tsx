@@ -1,11 +1,12 @@
 /**
- * Budget cards horizontal scroll component
+ * Budget cards grid component
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '@/core/theme';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { colors } from '../../../core/theme/colors';
+import { spacing } from '../../../core/theme/spacing';
+import { typography } from '../../../core/theme/typography';
 import { BudgetCard, BudgetCategory } from './BudgetCard';
 
 interface BudgetData {
@@ -29,18 +30,13 @@ export const BudgetGrid: React.FC<BudgetGridProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Budget Investi</Text>
-        <TouchableOpacity onPress={onViewAllPress} style={styles.viewAllButton}>
+        <TouchableOpacity onPress={onViewAllPress}>
           <Text style={styles.viewAll}>Voir tout</Text>
-          <Ionicons name="arrow-forward" size={16} color={colors.accentPrimary} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {budgets.map(budget => (
+      <View style={styles.grid}>
+        {budgets.map((budget) => (
           <BudgetCard
             key={budget.category}
             category={budget.category}
@@ -49,7 +45,7 @@ export const BudgetGrid: React.FC<BudgetGridProps> = ({
             onPress={() => onBudgetPress?.(budget.category)}
           />
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 };
@@ -67,17 +63,13 @@ const styles = StyleSheet.create({
     ...typography.h3,
     color: colors.textPrimary,
   },
-  viewAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
   viewAll: {
-    ...typography.link,
+    ...typography.caption,
     color: colors.accentPrimary,
   },
-  scrollContent: {
-    paddingRight: spacing.screenPaddingHorizontal,
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.m,
   },
 });

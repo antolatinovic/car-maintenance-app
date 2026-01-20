@@ -5,28 +5,12 @@
 
 export type FuelType = 'gasoline' | 'diesel' | 'electric' | 'hybrid';
 export type TransmissionType = 'manual' | 'automatic';
-export type MaintenanceCategory =
-  | 'oil_change'
-  | 'brakes'
-  | 'filters'
-  | 'tires'
-  | 'mechanical'
-  | 'revision'
-  | 'ac'
-  | 'custom';
+export type MaintenanceCategory = 'oil_change' | 'brakes' | 'filters' | 'tires' | 'mechanical' | 'revision' | 'ac' | 'custom';
 export type ReminderType = 'date' | 'mileage' | 'both';
 export type RecurrenceType = 'none' | 'monthly' | 'yearly' | 'km_based';
 export type ScheduleStatus = 'pending' | 'completed' | 'overdue';
 export type DocumentType = 'invoice' | 'fuel_receipt' | 'insurance' | 'administrative' | 'other';
-export type ExpenseType =
-  | 'fuel'
-  | 'maintenance'
-  | 'insurance'
-  | 'parking'
-  | 'tolls'
-  | 'fines'
-  | 'other';
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type ExpenseType = 'fuel' | 'maintenance' | 'insurance' | 'parking' | 'tolls' | 'fines' | 'other';
 
 export interface Profile {
   id: string;
@@ -149,26 +133,6 @@ export interface UserSettings {
   updated_at: string;
 }
 
-export interface Conversation {
-  id: string;
-  user_id: string;
-  vehicle_id: string | null;
-  title: string;
-  created_at: string;
-  updated_at: string;
-  last_message_at: string;
-}
-
-export interface Message {
-  id: string;
-  conversation_id: string;
-  role: MessageRole;
-  content: string;
-  document_id: string | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
-}
-
 export interface Database {
   public: {
     Tables: {
@@ -184,19 +148,12 @@ export interface Database {
       };
       maintenance_history: {
         Row: MaintenanceHistory;
-        Insert: Partial<MaintenanceHistory> & {
-          vehicle_id: string;
-          category: MaintenanceCategory;
-          date: string;
-        };
+        Insert: Partial<MaintenanceHistory> & { vehicle_id: string; category: MaintenanceCategory; date: string };
         Update: Partial<MaintenanceHistory>;
       };
       maintenance_schedule: {
         Row: MaintenanceSchedule;
-        Insert: Partial<MaintenanceSchedule> & {
-          vehicle_id: string;
-          category: MaintenanceCategory;
-        };
+        Insert: Partial<MaintenanceSchedule> & { vehicle_id: string; category: MaintenanceCategory };
         Update: Partial<MaintenanceSchedule>;
       };
       documents: {
@@ -206,28 +163,13 @@ export interface Database {
       };
       expenses: {
         Row: Expense;
-        Insert: Partial<Expense> & {
-          vehicle_id: string;
-          type: ExpenseType;
-          date: string;
-          amount: number;
-        };
+        Insert: Partial<Expense> & { vehicle_id: string; type: ExpenseType; date: string; amount: number };
         Update: Partial<Expense>;
       };
       user_settings: {
         Row: UserSettings;
         Insert: Partial<UserSettings> & { user_id: string };
         Update: Partial<UserSettings>;
-      };
-      conversations: {
-        Row: Conversation;
-        Insert: Partial<Conversation> & { user_id: string };
-        Update: Partial<Conversation>;
-      };
-      messages: {
-        Row: Message;
-        Insert: Partial<Message> & { conversation_id: string; role: MessageRole; content: string };
-        Update: Partial<Message>;
       };
     };
   };

@@ -1,5 +1,5 @@
 /**
- * Signup Screen - User registration (Modern Light Mode)
+ * Signup Screen - User registration
  */
 
 import React, { useState } from 'react';
@@ -14,10 +14,11 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, gradients, shadows, spacing, typography } from '@/core/theme';
+import { colors } from '@/core/theme/colors';
+import { spacing } from '@/core/theme/spacing';
+import { typography } from '@/core/theme/typography';
 
 interface SignupScreenProps {
   onSignup: (
@@ -80,7 +81,7 @@ export const SignupScreen: React.FC<SignupScreenProps> = ({
       } else {
         setSuccess(true);
       }
-    } catch {
+    } catch (err) {
       setError('Erreur de connexion');
     }
   };
@@ -96,15 +97,8 @@ export const SignupScreen: React.FC<SignupScreenProps> = ({
           <Text style={styles.successText}>
             Verifiez votre email pour confirmer votre compte, puis connectez-vous.
           </Text>
-          <TouchableOpacity onPress={onNavigateToLogin} activeOpacity={0.9}>
-            <LinearGradient
-              colors={gradients.violet}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.button}
-            >
-              <Text style={styles.buttonText}>Se connecter</Text>
-            </LinearGradient>
+          <TouchableOpacity style={styles.button} onPress={onNavigateToLogin} activeOpacity={0.8}>
+            <Text style={styles.buttonText}>Se connecter</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -246,19 +240,17 @@ export const SignupScreen: React.FC<SignupScreenProps> = ({
           )}
 
           {/* Signup Button */}
-          <TouchableOpacity onPress={handleSignup} disabled={isLoading} activeOpacity={0.9}>
-            <LinearGradient
-              colors={isLoading ? [colors.textTertiary, colors.textTertiary] : gradients.violet}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.button}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.textOnColor} />
-              ) : (
-                <Text style={styles.buttonText}>Creer mon compte</Text>
-              )}
-            </LinearGradient>
+          <TouchableOpacity
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleSignup}
+            disabled={isLoading}
+            activeOpacity={0.8}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.textPrimary} />
+            ) : (
+              <Text style={styles.buttonText}>Creer mon compte</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -287,14 +279,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxl,
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.cardBackground,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: spacing.l,
-    ...shadows.small,
   },
   title: {
     ...typography.h1,
@@ -319,7 +304,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.l,
   },
   label: {
-    ...typography.captionSemiBold,
+    ...typography.captionMedium,
     color: colors.textSecondary,
     marginBottom: spacing.s,
   },
@@ -329,7 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBackground,
     borderRadius: spacing.inputRadius,
     borderWidth: 1,
-    borderColor: colors.inputBorder,
+    borderColor: colors.border,
     paddingHorizontal: spacing.inputPaddingHorizontal,
     height: spacing.inputHeight,
   },
@@ -347,8 +332,8 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: `${colors.accentDanger}10`,
-    borderRadius: spacing.cardRadiusSmall,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: spacing.buttonRadius,
     padding: spacing.m,
     marginBottom: spacing.l,
   },
@@ -359,16 +344,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   button: {
+    backgroundColor: colors.accentPrimary,
     borderRadius: spacing.buttonRadius,
     height: spacing.buttonHeight,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing.m,
-    ...shadows.medium,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     ...typography.button,
-    color: colors.textOnColor,
+    color: colors.textPrimary,
   },
   footer: {
     flexDirection: 'row',
@@ -381,7 +369,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   footerLink: {
-    ...typography.bodySemiBold,
+    ...typography.bodyMedium,
     color: colors.accentPrimary,
   },
   successContainer: {
@@ -394,12 +382,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   successIconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: `${colors.accentSuccess}15`,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: spacing.xxl,
   },
   successTitle: {

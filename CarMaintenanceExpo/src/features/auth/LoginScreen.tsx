@@ -1,5 +1,5 @@
 /**
- * Login Screen - User authentication (Modern Light Mode)
+ * Login Screen - User authentication
  */
 
 import React, { useState } from 'react';
@@ -14,10 +14,11 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, gradients, shadows, spacing, typography } from '@/core/theme';
+import { colors } from '@/core/theme/colors';
+import { spacing } from '@/core/theme/spacing';
+import { typography } from '@/core/theme/typography';
 
 interface LoginScreenProps {
   onLogin: (email: string, password: string) => Promise<{ message: string } | null>;
@@ -70,14 +71,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <LinearGradient
-              colors={gradients.violet}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.logoGradient}
-            >
-              <Ionicons name="car-sport" size={40} color={colors.textOnColor} />
-            </LinearGradient>
+            <Ionicons name="car-sport" size={48} color={colors.accentPrimary} />
           </View>
           <Text style={styles.title}>Car Maintenance</Text>
           <Text style={styles.subtitle}>Connectez-vous pour continuer</Text>
@@ -141,19 +135,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           )}
 
           {/* Login Button */}
-          <TouchableOpacity onPress={handleLogin} disabled={isLoading} activeOpacity={0.9}>
-            <LinearGradient
-              colors={isLoading ? [colors.textTertiary, colors.textTertiary] : gradients.violet}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.button}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.textOnColor} />
-              ) : (
-                <Text style={styles.buttonText}>Se connecter</Text>
-              )}
-            </LinearGradient>
+          <TouchableOpacity
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={isLoading}
+            activeOpacity={0.8}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={colors.textPrimary} />
+            ) : (
+              <Text style={styles.buttonText}>Se connecter</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -183,15 +175,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxxl,
   },
   logoContainer: {
-    marginBottom: spacing.l,
-  },
-  logoGradient: {
     width: 80,
     height: 80,
-    borderRadius: spacing.cardRadius,
+    borderRadius: 20,
+    backgroundColor: colors.backgroundSecondary,
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadows.medium,
+    marginBottom: spacing.l,
   },
   title: {
     ...typography.h1,
@@ -209,7 +199,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.l,
   },
   label: {
-    ...typography.captionSemiBold,
+    ...typography.captionMedium,
     color: colors.textSecondary,
     marginBottom: spacing.s,
   },
@@ -219,7 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBackground,
     borderRadius: spacing.inputRadius,
     borderWidth: 1,
-    borderColor: colors.inputBorder,
+    borderColor: colors.border,
     paddingHorizontal: spacing.inputPaddingHorizontal,
     height: spacing.inputHeight,
   },
@@ -232,8 +222,8 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: `${colors.accentDanger}10`,
-    borderRadius: spacing.cardRadiusSmall,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: spacing.buttonRadius,
     padding: spacing.m,
     marginBottom: spacing.l,
   },
@@ -244,16 +234,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   button: {
+    backgroundColor: colors.accentPrimary,
     borderRadius: spacing.buttonRadius,
     height: spacing.buttonHeight,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: spacing.m,
-    ...shadows.medium,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   buttonText: {
     ...typography.button,
-    color: colors.textOnColor,
+    color: colors.textPrimary,
   },
   footer: {
     flexDirection: 'row',
@@ -266,7 +259,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   footerLink: {
-    ...typography.bodySemiBold,
+    ...typography.bodyMedium,
     color: colors.accentPrimary,
   },
 });
