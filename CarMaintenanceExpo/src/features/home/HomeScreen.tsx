@@ -23,7 +23,6 @@ import type { TabItem } from '@/shared/components/TabBar';
 import { HomeHeader } from './components/HomeHeader';
 import { UpcomingMaintenance } from './components/UpcomingMaintenance';
 import { useHomeData } from './hooks/useHomeData';
-import { Model3DViewer } from '@/shared/components';
 
 interface HomeScreenProps {
   userProfile?: Profile | null;
@@ -166,16 +165,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onAvatarPress={handleAvatarPress}
           onSettingsPress={onSettingsPress}
         />
-
-        {/* 3D Model Viewer */}
-        <View style={styles.section}>
-          <Model3DViewer
-            modelSource={require('../../../assets/models/car.glb')}
-            height={280}
-            autoRotate={true}
-            rotationSpeed={0.003}
-          />
-        </View>
 
         {/* Upcoming Maintenance - 2 items */}
         <View style={styles.section}>
