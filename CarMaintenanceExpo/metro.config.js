@@ -1,7 +1,8 @@
-// Learn more https://docs.expo.dev/guides/customizing-metro
 const { getDefaultConfig } = require('expo/metro-config');
 
-/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
+
+// Ajouter le support des fichiers GLB/GLTF pour les modèles 3D
+config.resolver.assetExts.push('glb', 'gltf');
 
 module.exports = config;

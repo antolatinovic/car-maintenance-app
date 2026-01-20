@@ -18,17 +18,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, gradients, shadows, spacing, typography } from '@/core/theme';
-import type { Profile, Vehicle } from '@/core/types/database';
+import type { Profile } from '@/core/types/database';
 import type { TabItem } from '@/shared/components/TabBar';
 import { HomeHeader } from './components/HomeHeader';
-import { VehicleCard } from './components/VehicleCard';
 import { UpcomingMaintenance } from './components/UpcomingMaintenance';
 import { useHomeData } from './hooks/useHomeData';
+import { Model3DViewer } from '@/shared/components';
 
 interface HomeScreenProps {
   userProfile?: Profile | null;
   onAddVehicle?: () => void;
-  onEditVehicle?: (vehicle: Vehicle) => void;
   onSettingsPress?: () => void;
   onAnalyticsPress?: () => void;
   onTabChange?: (tab: TabItem) => void;
@@ -37,7 +36,6 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   userProfile,
   onAddVehicle,
-  onEditVehicle,
   onSettingsPress,
   onAnalyticsPress,
   onTabChange,
@@ -77,12 +75,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   const handleAvatarPress = () => {
     onSettingsPress?.();
-  };
-
-  const handleVehiclePress = () => {
-    if (vehicle) {
-      onEditVehicle?.(vehicle);
-    }
   };
 
   const handleViewCalendar = () => {
@@ -175,9 +167,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           onSettingsPress={onSettingsPress}
         />
 
-        {/* Vehicle Card */}
+        {/* 3D Model Viewer */}
         <View style={styles.section}>
-          <VehicleCard vehicle={vehicle} onPress={handleVehiclePress} />
+          <Model3DViewer
+            modelSource={require('../../../assets/models/car.glb')}
+            height={280}
+            autoRotate={true}
+            rotationSpeed={0.003}
+          />
         </View>
 
         {/* Upcoming Maintenance - 2 items */}
