@@ -2,123 +2,150 @@
  * Home Screen - Main dashboard view
  */
 
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, RefreshControl, StatusBar } from 'react-native';
+import React from 'react';
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  RefreshControl,
+  StatusBar,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '../../core/theme/colors';
-import { spacing } from '../../core/theme/spacing';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, gradients, shadows, spacing, typography } from '@/core/theme';
+import type { Profile } from '@/core/types/database';
+import type { TabItem } from '@/shared/components/TabBar';
 import { HomeHeader } from './components/HomeHeader';
-import { VehicleCard } from './components/VehicleCard';
-import { BudgetGrid } from './components/BudgetGrid';
 import { UpcomingMaintenance } from './components/UpcomingMaintenance';
-import type { Vehicle, MaintenanceCategory } from '../../core/types/database';
-import type { BudgetCategory } from './components/BudgetCard';
+import { useHomeData } from './hooks/useHomeData';
+import { Model3DViewer } from '@/shared/components';
 
-// Mock data - will be replaced with real data from Supabase
-const mockUser = {
-  firstName: 'Antonin',
-  lastName: 'L',
-  avatarUrl: null,
-};
+interface HomeScreenProps {
+  userProfile?: Profile | null;
+  onAddVehicle?: () => void;
+  onSettingsPress?: () => void;
+  onAnalyticsPress?: () => void;
+  onTabChange?: (tab: TabItem) => void;
+}
 
-const mockVehicle: Partial<Vehicle> = {
-  id: '1',
-  brand: 'Peugeot',
-  model: '308',
-  year: 2020,
-  current_mileage: 45230,
-  fuel_type: 'diesel',
-  photo_url: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800',
-};
-
-const mockBudgets = [
-  { category: 'total' as BudgetCategory, amount: 2450, trend: 12 },
-  { category: 'fuel' as BudgetCategory, amount: 890, trend: -5 },
-  { category: 'maintenance' as BudgetCategory, amount: 1200, trend: 8 },
-  { category: 'other' as BudgetCategory, amount: 360 },
-];
-
-const mockMaintenances = [
-  {
-    id: '1',
-    title: 'Vidange huile moteur',
-    category: 'oil_change' as MaintenanceCategory,
-    dueDate: '2026-02-15',
-    dueMileage: 50000,
-    urgency: 'soon' as const,
-  },
-  {
-    id: '2',
-    title: 'Controle technique',
-    category: 'revision' as MaintenanceCategory,
-    dueDate: '2026-03-20',
-    urgency: 'upcoming' as const,
-  },
-  {
-    id: '3',
-    title: 'Remplacement plaquettes frein',
-    category: 'brakes' as MaintenanceCategory,
-    dueMileage: 55000,
-    urgency: 'upcoming' as const,
-  },
-];
-
-export const HomeScreen: React.FC = () => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({
+  userProfile,
+  onAddVehicle,
+  onSettingsPress,
+  onAnalyticsPress,
+  onTabChange,
+}) => {
   const insets = useSafeAreaInsets();
-  const [refreshing, setRefreshing] = useState(false);
+  const { vehicle, maintenances, isLoading, refresh } = useHomeData();
+
+  const userName = userProfile
+    ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Utilisateur'
+    : 'Utilisateur';
+  const userAvatar = userProfile?.avatar_url || null;
+
+  const maintenanceItems = maintenances.map(m => ({
+    id: m.id,
+    title: m.title,
+    category: m.category,
+    dueDate: m.dueDate,
+    dueMileage: m.dueMileage,
+    urgency: m.urgency,
+  }));
+
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Reload data from Supabase
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await refresh();
     setRefreshing(false);
   };
 
   const handleNotificationPress = () => {
-    console.log('Notifications pressed');
+    Alert.alert(
+      'Notifications',
+      'Les notifications push seront disponibles prochainement.',
+      [{ text: 'OK' }]
+    );
   };
 
   const handleAvatarPress = () => {
-    console.log('Avatar pressed');
-  };
-
-  const handleVehiclePress = () => {
-    console.log('Vehicle pressed');
-  };
-
-  const handleVehicleEdit = () => {
-    console.log('Edit vehicle pressed');
-  };
-
-  const handleVehicleQuickAction = (action: 'details' | 'mileage' | 'more') => {
-    console.log('Quick action:', action);
-  };
-
-  const handleViewAllBudgets = () => {
-    console.log('View all budgets');
-  };
-
-  const handleBudgetPress = (category: BudgetCategory) => {
-    console.log('Budget pressed:', category);
+    onSettingsPress?.();
   };
 
   const handleViewCalendar = () => {
-    console.log('View calendar');
+    onTabChange?.('calendar');
   };
 
-  const handleMaintenancePress = (item: any) => {
-    console.log('Maintenance pressed:', item.title);
+  const handleMaintenancePress = (_item: { title: string }) => {
+    onTabChange?.('calendar');
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+        <ActivityIndicator size="large" color={colors.accentPrimary} />
+      </View>
+    );
+  }
+
+  // No vehicle state
+  if (!vehicle) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+        <View style={[styles.content, { paddingTop: insets.top }]}>
+          <HomeHeader
+            userName={userName}
+            userAvatar={userAvatar}
+            notificationCount={0}
+            onNotificationPress={handleNotificationPress}
+            onAvatarPress={handleAvatarPress}
+            onSettingsPress={onSettingsPress}
+          />
+          <View style={[styles.emptyState, { marginTop: spacing.xxxl * 2 }]}>
+            <View style={styles.emptyIconContainer}>
+              <Ionicons name="car-sport" size={48} color={colors.accentPrimary} />
+            </View>
+            <Text style={styles.emptyTitle}>Aucun vehicule</Text>
+            <Text style={styles.emptyDescription}>
+              Ajoutez votre premier vehicule pour commencer a suivre son entretien
+            </Text>
+            <TouchableOpacity onPress={onAddVehicle} activeOpacity={0.9}>
+              <LinearGradient
+                colors={gradients.violet}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.addButton}
+              >
+                <Ionicons name="add" size={22} color={colors.textOnColor} />
+                <Text style={styles.addButtonText}>Ajouter un vehicule</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.backgroundPrimary} />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top, paddingBottom: spacing.tabBarHeight + spacing.xxxl + insets.bottom },
+          {
+            paddingTop: insets.top,
+            paddingBottom: spacing.tabBarHeight + spacing.xxxl + insets.bottom,
+          },
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -132,36 +159,29 @@ export const HomeScreen: React.FC = () => {
       >
         {/* Header */}
         <HomeHeader
-          userName={`${mockUser.firstName} ${mockUser.lastName}`}
-          userAvatar={mockUser.avatarUrl}
+          userName={userName}
+          userAvatar={userAvatar}
           notificationCount={2}
           onNotificationPress={handleNotificationPress}
           onAvatarPress={handleAvatarPress}
+          onSettingsPress={onSettingsPress}
         />
 
-        {/* Vehicle Card */}
+        {/* 3D Model Viewer */}
         <View style={styles.section}>
-          <VehicleCard
-            vehicle={mockVehicle}
-            onPress={handleVehiclePress}
-            onEditPress={handleVehicleEdit}
-            onQuickAction={handleVehicleQuickAction}
+          <Model3DViewer
+            modelSource={require('../../../assets/models/car.glb')}
+            height={280}
+            autoRotate={true}
+            rotationSpeed={0.003}
           />
         </View>
 
-        {/* Budget Grid */}
-        <View style={styles.section}>
-          <BudgetGrid
-            budgets={mockBudgets}
-            onViewAllPress={handleViewAllBudgets}
-            onBudgetPress={handleBudgetPress}
-          />
-        </View>
-
-        {/* Upcoming Maintenance */}
+        {/* Upcoming Maintenance - 2 items */}
         <View style={styles.section}>
           <UpcomingMaintenance
-            items={mockMaintenances}
+            items={maintenanceItems}
+            maxItems={2}
             onViewAllPress={handleViewCalendar}
             onItemPress={handleMaintenancePress}
           />
@@ -176,6 +196,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.backgroundPrimary,
   },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollView: {
     flex: 1,
   },
@@ -185,5 +209,45 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: spacing.screenPaddingHorizontal,
     marginTop: spacing.l,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.screenPaddingHorizontal,
+  },
+  emptyIconContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: `${colors.accentPrimary}10`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xxl,
+  },
+  emptyTitle: {
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.m,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xxl,
+    maxWidth: 280,
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: spacing.buttonRadius,
+    paddingHorizontal: spacing.xl,
+    height: spacing.buttonHeight,
+    gap: spacing.s,
+    ...shadows.medium,
+  },
+  addButtonText: {
+    ...typography.button,
+    color: colors.textOnColor,
   },
 });

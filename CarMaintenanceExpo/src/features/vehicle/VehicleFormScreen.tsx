@@ -21,6 +21,7 @@ import { spacing } from '@/core/theme/spacing';
 import { typography } from '@/core/theme/typography';
 import { createVehicle, updateVehicle, CreateVehicleData } from '@/services/vehicleService';
 import type { Vehicle, FuelType } from '@/core/types/database';
+import { BrandModelPicker } from './components/BrandModelPicker';
 
 interface VehicleFormScreenProps {
   vehicle?: Vehicle;
@@ -124,31 +125,14 @@ export const VehicleFormScreen: React.FC<VehicleFormScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Brand */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Marque *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.brand}
-            onChangeText={value => handleChange('brand', value)}
-            placeholder="Ex: Peugeot, Renault, Toyota..."
-            placeholderTextColor={colors.textTertiary}
-            editable={!isLoading}
-          />
-        </View>
-
-        {/* Model */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Modele *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.model}
-            onChangeText={value => handleChange('model', value)}
-            placeholder="Ex: 308, Clio, Yaris..."
-            placeholderTextColor={colors.textTertiary}
-            editable={!isLoading}
-          />
-        </View>
+        {/* Brand & Model Picker */}
+        <BrandModelPicker
+          initialBrand={vehicle?.brand}
+          initialModel={vehicle?.model}
+          onBrandChange={value => handleChange('brand', value)}
+          onModelChange={value => handleChange('model', value)}
+          disabled={isLoading}
+        />
 
         {/* Year */}
         <View style={styles.inputGroup}>
