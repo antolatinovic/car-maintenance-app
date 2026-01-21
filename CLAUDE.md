@@ -2,185 +2,117 @@
 
 Ce fichier definit les conventions et l'architecture du projet. Il est lu automatiquement par Claude Code a chaque session.
 
+## Etat Actuel du Projet (21 Janvier 2026)
+
+### Fonctionnalites Implementees
+- Authentification (Login/Signup avec Supabase)
+- Ecran d'accueil avec maintenances a venir
+- Gestion des vehicules (ajout, modification)
+- Suivi des depenses
+- Gestion des documents
+- Calendrier des maintenances
+- Statistiques/Analytics
+- Parametres utilisateur
+- Assistant IA (en cours)
+
+### A Faire
+- Notifications push
+- Mode hors-ligne
+- Export des donnees
+
 ## Architecture du Projet
 
 ```
 CarMaintenanceExpo/
 ├── src/
 │   ├── core/                 # Configuration et theme centralises
-│   │   ├── config/          # Supabase, API configs
-│   │   ├── theme/           # colors, spacing, typography
+│   │   ├── config/          # Supabase config
+│   │   ├── contexts/        # Contexts partages (AuthContext, AppContext)
+│   │   ├── theme/           # colors, spacing, typography, gradients, shadows
 │   │   ├── types/           # Types TypeScript centralises
-│   │   │   ├── index.ts     # Export centralise
-│   │   │   ├── database.ts  # Types Supabase
-│   │   │   ├── analytics.ts # Types analytics
-│   │   │   └── carQuery.ts  # Types CarQuery API
-│   │   └── utils/           # Utilitaires reutilisables
-│   │       ├── index.ts
-│   │       └── cache.ts     # Cache AsyncStorage generique
+│   │   └── utils/           # Utilitaires (cache AsyncStorage)
 │   │
-│   ├── features/            # Modules fonctionnels (1 dossier = 1 feature)
-│   │   ├── home/            # Ecran d'accueil
+│   ├── features/            # Modules fonctionnels ISOLES (1 dossier = 1 feature)
+│   │   ├── home/            # Ecran d'accueil + maintenances
 │   │   ├── vehicle/         # Formulaire vehicule
-│   │   ├── documents/       # Gestion documents
+│   │   ├── documents/       # Gestion documents/factures
 │   │   ├── assistant/       # Assistant IA
 │   │   ├── calendar/        # Calendrier maintenances
 │   │   ├── expenses/        # Suivi depenses
-│   │   ├── analytics/       # Statistiques
-│   │   ├── settings/        # Parametres
-│   │   └── auth/            # Authentification
+│   │   ├── analytics/       # Statistiques et graphiques
+│   │   ├── settings/        # Parametres utilisateur
+│   │   └── auth/            # Login/Signup
 │   │
 │   ├── shared/              # Composants reutilisables
-│   │   └── components/
-│   │
-│   ├── navigation/          # Configuration React Navigation
+│   │   └── components/      # Avatar, Card, TabBar, FeatureErrorBoundary
 │   │
 │   └── services/            # Logique metier, appels API
-│       ├── index.ts         # Export centralise
 │       ├── vehicleService.ts
 │       ├── maintenanceService.ts
 │       ├── expenseService.ts
 │       ├── documentService.ts
+│       ├── settingsService.ts
 │       └── carQueryService.ts  # API externe marques/modeles
 │
-├── App.tsx                  # Point d'entree
-└── app.json                 # Config Expo
+├── assets/                  # Images, fonts
+├── App.tsx                  # Point d'entree + Providers + Error Boundaries
+├── app.json                 # Config Expo
+└── .env                     # Variables d'environnement (non commite)
 ```
 
-## Conventions de Nommage
+## Stack Technique
 
-| Type | Convention | Exemple |
-|------|------------|---------|
-| Composants | PascalCase | `VehicleCard.tsx` |
-| Hooks | camelCase + use | `useVehicleData.ts` |
-| Services | camelCase | `vehicleService.ts` |
-| Types/Interfaces | PascalCase | `Vehicle`, `BudgetCategory` |
-| Constantes | SCREAMING_SNAKE | `MAX_VEHICLES` |
-| Fonctions | camelCase | `calculateBudget()` |
-| Dossiers features | kebab-case | `home/`, `vehicle-details/` |
+- **Framework**: React Native avec Expo SDK 54
+- **Language**: TypeScript
+- **Navigation**: React Navigation 7
+- **Backend**: Supabase (Auth + Database + Storage)
+- **State**: React Hooks + Context API
+- **UI**: Composants custom + expo-linear-gradient
+- **Charts**: react-native-gifted-charts
 
-## Structure d'un Composant
+## Variables d'Environnement
 
-```typescript
-/**
- * Description du composant
- */
-
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-// Imports Expo
-// Imports theme
-import { colors, spacing, typography } from '@/core/theme';
-// Imports composants
-// Imports types
-
-interface ComponentNameProps {
-  requiredProp: string;
-  optionalProp?: number;
-}
-
-export const ComponentName: React.FC<ComponentNameProps> = ({
-  requiredProp,
-  optionalProp,
-}) => {
-  // Hooks en premier
-  // Logique
-  // Return JSX
-
-  return (
-    <View style={styles.container}>
-      {/* JSX */}
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    // Utiliser colors, spacing, typography du theme
-  },
-});
+Creer un fichier `.env` a la racine avec :
+```
+SUPABASE_URL=https://dahijvkdrsmrgwvosyym.supabase.co
+SUPABASE_ANON_KEY=votre_cle_anon
 ```
 
-## Structure d'une Feature
+## Commandes
 
-Chaque nouvelle feature doit suivre cette structure :
-
-```
-features/nom-feature/
-├── NomFeatureScreen.tsx     # Ecran principal
-├── components/              # Composants specifiques
-│   ├── ComponentA.tsx
-│   ├── ComponentB.tsx
-│   └── index.ts            # Export centralise
-├── hooks/                   # Custom hooks
-│   └── useNomFeature.ts
-├── services/               # Logique metier (optionnel)
-│   └── nomFeatureService.ts
-└── index.ts                # Export public
+```bash
+npm start          # Demarrer Expo
+npm start -- --clear  # Demarrer avec cache vide
+npm run ios        # Simulateur iOS
+npm run android    # Emulateur Android
+npm run lint       # Verifier le code
+npm run lint:fix   # Corriger les erreurs ESLint
+npm run typecheck  # Verifier les types TypeScript
 ```
 
-## Regles de Code
+## Conventions de Code
 
-### Obligatoire
-- TypeScript strict (pas de `any`)
-- Utiliser le theme centralise (jamais de couleurs en dur)
-- Exporter via `index.ts` pour chaque dossier
-- Composants fonctionnels avec React.FC
-- StyleSheet.create() pour tous les styles
+### Nommage
+- Composants : PascalCase (`VehicleCard.tsx`)
+- Hooks : camelCase + use (`useVehicleData.ts`)
+- Services : camelCase (`vehicleService.ts`)
+- Types : PascalCase (`Vehicle`, `Profile`)
 
-### Imports
-Ordre des imports :
+### Imports (ordre)
 1. React / React Native
-2. Bibliotheques externes (Expo, etc.)
+2. Bibliotheques externes (Expo)
 3. Core (theme, config, types, utils)
 4. Services
 5. Shared components
 6. Feature components
-7. Types locaux
 
-```typescript
-// Exemple d'imports
-import React from 'react';
-import { View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing } from '@/core/theme';
-import type { CarMake } from '@/core/types';
-import { getCached, setCache } from '@/core/utils';
-import { getMakes } from '@/services/carQueryService';
-```
+### Theme
+- Utiliser `@/core/theme` pour colors, spacing, typography
+- Ne jamais mettre de couleurs en dur
 
-### Gestion d'Etat
-- useState pour etat local simple
-- Context API pour etat partage entre composants
-- Supabase pour donnees persistantes
+## Base de Donnees Supabase
 
-### Gestion des Erreurs
-- Try/catch sur tous les appels async
-- Messages d'erreur utilisateur en francais
-- Console.error pour debug (a retirer en prod)
-
-## Theme
-
-### Couleurs (src/core/theme/colors.ts)
-- `background*` : Fonds (Primary, Secondary, Tertiary)
-- `text*` : Textes (Primary, Secondary, Tertiary)
-- `accent*` : Couleurs d'accent (Primary=bleu, Secondary=vert)
-- `state*` : Etats (Success, Warning, Error)
-
-### Spacing (src/core/theme/spacing.ts)
-- `xs` (4), `s` (8), `m` (12), `l` (16), `xl` (20), `xxl` (24), `xxxl` (32)
-- `screenPaddingHorizontal` (20)
-- `tabBarHeight` (80)
-
-### Typography (src/core/theme/typography.ts)
-- `h1`, `h2`, `h3` : Titres
-- `body`, `bodyBold` : Corps de texte
-- `caption`, `small` : Petits textes
-- `button`, `tabLabel` : Actions
-
-## Base de Donnees (Supabase)
-
-### Tables principales
+### Tables
 - `profiles` : Utilisateurs
 - `vehicles` : Vehicules
 - `maintenance_history` : Historique maintenances
@@ -188,102 +120,76 @@ import { getMakes } from '@/services/carQueryService';
 - `expenses` : Depenses
 - `documents` : Factures/documents
 
-### Acces
-```typescript
-import { supabase } from '@/core/config/supabase';
-```
+## Regles d'Architecture Modulaire
 
-## Commandes
+### Principe d'Isolation des Features
 
-```bash
-# Depuis la racine du projet
-npm start          # Demarrer Expo
-npm run ios        # Simulateur iOS
-npm run android    # Emulateur Android
-npm run lint       # Verifier le code
-npm run format     # Formater le code
+Chaque feature est isolee dans son "cocon" :
+- Une erreur dans un module ne crash pas l'app (grace aux Error Boundaries)
+- Les features ne s'importent JAMAIS entre elles directement
+- Les dependances entre features passent par les Contexts
 
-# Depuis CarMaintenanceExpo/
-npm run lint:fix   # Corriger les erreurs ESLint
-npm run typecheck  # Verifier les types TypeScript
-```
+### Imports Autorises / Interdits
 
-## Outils de Qualite
+| Depuis | Peut importer | NE PEUT PAS importer |
+|--------|---------------|---------------------|
+| `features/X` | `@/core/*`, `@/services/*`, `@/shared/*` | `@/features/Y` (autre feature) |
+| `services/` | `@/core/*` | `@/features/*` |
+| `shared/` | `@/core/*` | `@/features/*`, `@/services/*` |
+| `App.tsx` | Tout | - |
 
-### ESLint + Prettier
-- Formatage automatique a la sauvegarde (VS Code)
-- Pre-commit hook via Husky (lint-staged)
-- Config: `.eslintrc.js` et `.prettierrc`
+### Communication Entre Features
 
-### Variables d'Environnement
-- Fichier `.env` (non commite, contient les secrets)
-- Fichier `.env.example` (template a copier)
-- Utilisation:
-```typescript
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
-```
-
-### Alias d'Import
-- `@/` pointe vers `src/`
-- Exemples:
-```typescript
-import { colors } from '@/core/theme';
-import type { Vehicle } from '@/core/types';
-import { getCached } from '@/core/utils';
-import { getMakes } from '@/services/carQueryService';
-```
-
-## Utilitaires (core/utils)
-
-### Cache (cache.ts)
-Utilitaire generique pour le cache AsyncStorage avec versioning.
+Utiliser les Contexts dans `@/core/contexts/` :
 
 ```typescript
-import { getCached, setCache, CACHE_DURATIONS } from '@/core/utils';
+// Dans une feature qui a besoin de l'auth :
+import { useAuthContext } from '@/core/contexts';
+const { profile, signOut } = useAuthContext();
 
-// Lire depuis le cache (retourne null si expire ou absent)
-const data = await getCached<MyType>('cache_key', CACHE_DURATIONS.WEEK);
-
-// Ecrire dans le cache
-await setCache('cache_key', myData);
-
-// Durees predefinies
-CACHE_DURATIONS.SHORT   // 5 minutes
-CACHE_DURATIONS.MEDIUM  // 1 heure
-CACHE_DURATIONS.LONG    // 1 jour
-CACHE_DURATIONS.WEEK    // 7 jours
+// Dans une feature qui doit naviguer ou ouvrir une modal :
+import { useAppContext } from '@/core/contexts';
+const { openVehicleForm, navigateToTab } = useAppContext();
 ```
 
-## APIs Externes
+### Structure d'Export d'une Feature
 
-### CarQuery API (carQueryService.ts)
-API gratuite pour recuperer les marques et modeles de vehicules.
+Chaque feature exporte UNIQUEMENT son Screen principal :
 
 ```typescript
-import { getMakes, getModels } from '@/services/carQueryService';
-
-// Toutes les marques (cachees 7 jours)
-const makes = await getMakes();
-
-// Modeles d'une marque (caches 7 jours)
-const models = await getModels('peugeot');
+// src/features/expenses/index.ts
+export { ExpensesScreen } from './ExpensesScreen';
+// PAS de hooks, PAS de components internes
 ```
 
-Les marques populaires francaises sont affichees en priorite.
+Les hooks et components internes restent prives a la feature.
 
-## Checklist Nouveau Composant
+### Error Boundaries
 
-- [ ] Fichier en PascalCase.tsx
-- [ ] Interface Props definie
-- [ ] Utilise le theme (colors, spacing, typography)
-- [ ] Styles avec StyleSheet.create()
-- [ ] Exporte dans index.ts du dossier
-- [ ] Commentaire JSDoc si complexe
+Chaque ecran est wrappe dans un `FeatureErrorBoundary` dans App.tsx :
 
-## Checklist Nouvelle Feature
+```tsx
+<FeatureErrorBoundary featureName="Accueil">
+  <HomeScreen />
+</FeatureErrorBoundary>
+```
 
-- [ ] Dossier dans src/features/
-- [ ] Structure : Screen + components/ + hooks/
-- [ ] index.ts avec exports
-- [ ] Navigation configuree
-- [ ] Types definis si necessaire
+Cela permet :
+- Afficher un fallback elegant en cas d'erreur
+- Ne pas crasher toute l'app si une feature a un bug
+- Offrir un bouton "Reessayer" a l'utilisateur
+
+### Checklist Nouvelle Feature
+
+- [ ] Creer le dossier dans `src/features/nom-feature/`
+- [ ] Exporter UNIQUEMENT le Screen dans `index.ts`
+- [ ] Utiliser `useAuthContext` au lieu d'importer `useAuth`
+- [ ] Utiliser `useAppContext` pour la navigation inter-feature
+- [ ] Ne JAMAIS importer depuis une autre feature
+
+## Notes Importantes
+
+1. **Fichier .env** : Non commite, doit etre cree manuellement
+2. **Authentication** : Utilise Supabase Auth avec email/password
+3. **Cache** : AsyncStorage avec durees predefinies (SHORT, MEDIUM, LONG, WEEK)
+4. **Isolation** : Les features sont isolees avec Error Boundaries et Contexts
