@@ -4,9 +4,10 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows, spacing, typography } from '@/core/theme';
-import { Card } from '@/shared/components/Card';
+import { GlassCard } from '@/shared/components/GlassCard';
 import type { MaintenanceCategory } from '@/core/types/database';
 
 type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'upcoming' | 'optional';
@@ -101,14 +102,14 @@ export const UpcomingMaintenance: React.FC<UpcomingMaintenanceProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Prochaines Echeances</Text>
+        <Text style={styles.title}>Prochaines Échéances</Text>
         <TouchableOpacity onPress={onViewAllPress} style={styles.viewAllButton}>
           <Text style={styles.viewAll}>Voir calendrier</Text>
           <Ionicons name="arrow-forward" size={16} color={colors.accentPrimary} />
         </TouchableOpacity>
       </View>
 
-      <Card variant="elevated" style={styles.card}>
+      <GlassCard variant="light" style={styles.card}>
         {displayItems.length > 0 ? (
           displayItems.map((item, index) => (
             <React.Fragment key={item.id}>
@@ -118,14 +119,17 @@ export const UpcomingMaintenance: React.FC<UpcomingMaintenanceProps> = ({
           ))
         ) : (
           <View style={styles.emptyState}>
-            <View style={styles.emptyIconContainer}>
-              <Ionicons name="checkmark-circle" size={40} color={colors.accentSuccess} />
-            </View>
-            <Text style={styles.emptyText}>Aucune echeance a venir</Text>
-            <Text style={styles.emptySubtext}>Votre vehicule est a jour!</Text>
+            <Image
+              source={require('../../../../assets/check-success.png')}
+              style={styles.emptyIcon}
+              contentFit="contain"
+              cachePolicy="memory-disk"
+            />
+            <Text style={styles.emptyText}>Aucune échéance à venir</Text>
+            <Text style={styles.emptySubtext}>Votre véhicule est à jour !</Text>
           </View>
         )}
-      </Card>
+      </GlassCard>
     </View>
   );
 };
@@ -209,13 +213,9 @@ const styles = StyleSheet.create({
     padding: spacing.xxl,
     gap: spacing.s,
   },
-  emptyIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: `${colors.accentSuccess}15`,
-    alignItems: 'center',
-    justifyContent: 'center',
+  emptyIcon: {
+    width: 48,
+    height: 48,
   },
   emptyText: {
     ...typography.bodySemiBold,

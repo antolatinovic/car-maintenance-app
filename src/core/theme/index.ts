@@ -11,6 +11,9 @@ export type { TypographyKey } from './typography';
 export { spacing } from './spacing';
 export type { SpacingKey } from './spacing';
 
+export { glass } from './glass';
+export type { GlassVariant } from './glass';
+
 // Combined theme object
 export const theme = {
   colors: require('./colors').colors,
@@ -18,4 +21,5 @@ export const theme = {
   shadows: require('./colors').shadows,
   typography: require('./typography').typography,
   spacing: require('./spacing').spacing,
+  glass: require('./glass').glass,
 };

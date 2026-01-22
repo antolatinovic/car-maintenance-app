@@ -1,11 +1,15 @@
 /**
  * Authentication hook for Supabase auth management
+ * Supports offline mode with cached profile
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/core/config/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 import type { Profile } from '@/core/types/database';
+
+const PROFILE_CACHE_KEY = 'cached_user_profile';
 
 interface AuthState {
   user: User | null;
@@ -41,30 +45,71 @@ export const useAuth = (): UseAuthReturn => {
     isAuthenticated: false,
   });
 
-  // Fetch user profile from database
+  // Get cached profile from AsyncStorage
+  const getCachedProfile = useCallback(async (): Promise<Profile | null> => {
+    try {
+      const cached = await AsyncStorage.getItem(PROFILE_CACHE_KEY);
+      if (cached) {
+        return JSON.parse(cached);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // Cache profile to AsyncStorage
+  const cacheProfile = useCallback(async (profile: Profile): Promise<void> => {
+    try {
+      await AsyncStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+    } catch {
+      // Ignore cache errors
+    }
+  }, []);
+
+  // Fetch user profile from database with timeout and fallback to cache
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
     try {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      // Create a promise that rejects after timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('timeout')), 5000);
+      });
+
+      // Race between fetch and timeout
+      const fetchPromise = supabase.from('profiles').select('*').eq('id', userId).single();
+
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (error) {
         console.error('Error fetching profile:', error);
-        return null;
+        // Try to get cached profile
+        return await getCachedProfile();
+      }
+
+      // Cache the profile for offline use
+      if (data) {
+        await cacheProfile(data);
       }
 
       return data;
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      return null;
+      console.error('Error fetching profile (possibly offline):', error);
+      // Return cached profile when offline
+      return await getCachedProfile();
     }
-  }, []);
+  }, [getCachedProfile, cacheProfile]);
 
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+        // Get session with timeout for offline scenarios
+        const timeoutPromise = new Promise<{ data: { session: Session | null } }>((resolve) => {
+          setTimeout(() => resolve({ data: { session: null } }), 5000);
+        });
+
+        const sessionPromise = supabase.auth.getSession();
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
 
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
@@ -76,17 +121,43 @@ export const useAuth = (): UseAuthReturn => {
             isAuthenticated: true,
           });
         } else {
-          setState({
-            user: null,
-            profile: null,
-            session: null,
-            isLoading: false,
-            isAuthenticated: false,
-          });
+          // No session from Supabase, check if we have cached profile (offline scenario)
+          const cachedProfile = await getCachedProfile();
+          if (cachedProfile) {
+            // We have cached data, user was previously logged in
+            // Show them as authenticated with cached profile
+            setState({
+              user: null,
+              profile: cachedProfile,
+              session: null,
+              isLoading: false,
+              isAuthenticated: true, // Allow offline access with cached profile
+            });
+          } else {
+            setState({
+              user: null,
+              profile: null,
+              session: null,
+              isLoading: false,
+              isAuthenticated: false,
+            });
+          }
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-        setState(prev => ({ ...prev, isLoading: false }));
+        // Try cached profile on error (likely offline)
+        const cachedProfile = await getCachedProfile();
+        if (cachedProfile) {
+          setState({
+            user: null,
+            profile: cachedProfile,
+            session: null,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+        } else {
+          setState(prev => ({ ...prev, isLoading: false }));
+        }
       }
     };
 
@@ -119,7 +190,7 @@ export const useAuth = (): UseAuthReturn => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, getCachedProfile]);
 
   // Sign up with email and password
   const signUp = useCallback(
@@ -200,6 +271,8 @@ export const useAuth = (): UseAuthReturn => {
   // Sign out
   const signOut = useCallback(async (): Promise<void> => {
     try {
+      // Clear cached profile
+      await AsyncStorage.removeItem(PROFILE_CACHE_KEY);
       await supabase.auth.signOut();
     } catch (error) {
       console.error('Error signing out:', error);

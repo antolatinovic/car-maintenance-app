@@ -4,7 +4,9 @@
 
 export { Avatar } from './Avatar';
 export { Card } from './Card';
+export { GlassCard } from './GlassCard';
 export { TabBar } from './TabBar';
 export type { TabItem } from './TabBar';
 export { PlaceholderScreen } from './PlaceholderScreen';
 export { FeatureErrorBoundary } from './FeatureErrorBoundary';
+export { OfflineBanner } from './OfflineBanner';

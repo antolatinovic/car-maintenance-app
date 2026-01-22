@@ -5,6 +5,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { UserSettings } from '@/core/types/database';
 import { getUserSettings, updateUserSettings } from '@/services/settingsService';
+import { getVehicles } from '@/services/vehicleService';
+import { getMaintenanceSchedule } from '@/services/maintenanceService';
+import {
+  requestPermissions,
+  cancelAllNotifications,
+  scheduleAllMaintenanceNotifications,
+} from '@/services/notificationService';
 
 interface UseSettingsReturn {
   settings: UserSettings | null;
@@ -70,7 +77,33 @@ export const useSettings = (): UseSettingsReturn => {
 
   const toggleNotifications = useCallback(async (): Promise<boolean> => {
     if (!settings) return false;
-    return updateSettings({ notification_enabled: !settings.notification_enabled });
+
+    const newValue = !settings.notification_enabled;
+
+    if (newValue) {
+      // Enabling notifications
+      const hasPermission = await requestPermissions();
+      if (!hasPermission) {
+        setError('Permissions de notification refusees');
+        return false;
+      }
+
+      // Schedule notifications for all maintenances
+      const vehiclesResult = await getVehicles();
+      if (vehiclesResult.data) {
+        for (const vehicle of vehiclesResult.data) {
+          const maintenanceResult = await getMaintenanceSchedule(vehicle.id);
+          if (maintenanceResult.data) {
+            await scheduleAllMaintenanceNotifications(maintenanceResult.data);
+          }
+        }
+      }
+    } else {
+      // Disabling notifications - cancel all scheduled
+      await cancelAllNotifications();
+    }
+
+    return updateSettings({ notification_enabled: newValue });
   }, [settings, updateSettings]);
 
   const setMileageUnit = useCallback(

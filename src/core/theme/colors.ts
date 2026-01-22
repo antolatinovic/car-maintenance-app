@@ -50,6 +50,8 @@ export const gradients = {
   green: ['#10B981', '#059669'] as const,
   red: ['#EF4444', '#DC2626'] as const,
   purple: ['#8B5CF6', '#6D28D9'] as const,
+  // Background gradient for glassmorphism effect (violet to peach/warm)
+  background: ['#C4B5FD', '#FBCFE8', '#FED7AA'] as const, // Violet -> rose -> pêche
 } as const;
 
 // Shadow presets

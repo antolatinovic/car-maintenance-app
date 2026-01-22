@@ -26,3 +26,8 @@ export const CAR_SKINS: CarSkin[] = [
 ];
 
 export const DEFAULT_CAR_SKIN: CarSkinId = 'classic';
+
+// Display mode: show user's photo or skin
+export const CAR_DISPLAY_MODE_KEY = 'car_display_mode';
+export type CarDisplayMode = 'photo' | 'skin';
+export const DEFAULT_CAR_DISPLAY_MODE: CarDisplayMode = 'skin';

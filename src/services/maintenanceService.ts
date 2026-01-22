@@ -8,6 +8,10 @@ import type {
   MaintenanceSchedule,
   MaintenanceCategory,
 } from '@/core/types/database';
+import {
+  scheduleMaintenanceNotifications,
+  cancelMaintenanceNotifications,
+} from './notificationService';
 
 interface ServiceError {
   message: string;
@@ -227,7 +231,14 @@ export const scheduleMaintenance = async (
       return { data: null, error: { message: error.message, code: error.code } };
     }
 
-    return { data: data as MaintenanceSchedule, error: null };
+    const maintenance = data as MaintenanceSchedule;
+
+    // Schedule push notifications for this maintenance
+    if (maintenance.due_date) {
+      await scheduleMaintenanceNotifications(maintenance);
+    }
+
+    return { data: maintenance, error: null };
   } catch (error) {
     return { data: null, error: { message: 'Erreur lors de la planification' } };
   }
@@ -241,6 +252,9 @@ export const completeMaintenance = async (
   completionData?: Partial<CreateMaintenanceData>
 ): Promise<ServiceResult<MaintenanceSchedule>> => {
   try {
+    // Cancel notifications for this maintenance
+    await cancelMaintenanceNotifications(scheduleId);
+
     // Update the schedule status
     const { data: schedule, error: scheduleError } = await supabase
       .from('maintenance_schedule')
@@ -279,6 +293,9 @@ export const completeMaintenance = async (
  */
 export const deleteSchedule = async (scheduleId: string): Promise<ServiceResult<boolean>> => {
   try {
+    // Cancel notifications for this maintenance
+    await cancelMaintenanceNotifications(scheduleId);
+
     const { error } = await supabase.from('maintenance_schedule').delete().eq('id', scheduleId);
 
     if (error) {

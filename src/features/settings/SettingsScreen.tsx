@@ -7,7 +7,7 @@ import { View, ScrollView, StyleSheet, StatusBar, Alert, TouchableOpacity, Text 
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/core/theme';
-import { useAuthContext, useAppContext } from '@/core/contexts';
+import { useAuthContext, useAppContext, useOfflineContext } from '@/core/contexts';
 import { useSettings, useProfileEdit, useVehicleManagement, useCarSkin } from './hooks';
 import {
   SettingsHeader,
@@ -39,7 +39,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
     useProfileEdit(refreshProfile);
   const { vehicles, isLoading: isLoadingVehicles, primaryVehicleId, setAsPrimary } =
     useVehicleManagement();
-  const { currentSkin, setSkin } = useCarSkin();
+  const { currentSkin, setSkin, displayMode, setDisplayMode } = useCarSkin();
+  const { debugForceOffline, setDebugForceOffline, isOnline, pendingOperationsCount } = useOfflineContext();
 
   // Modal states
   const [showProfileEdit, setShowProfileEdit] = useState(false);
@@ -117,11 +118,26 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
     [setSkin]
   );
 
-  // Get primary vehicle name for display
+  const handleDebugOfflineToggle = useCallback(() => {
+    setDebugForceOffline(!debugForceOffline);
+  }, [debugForceOffline, setDebugForceOffline]);
+
+  const handleDisplayModeChange = useCallback(
+    async (mode: 'photo' | 'skin') => {
+      const success = await setDisplayMode(mode);
+      if (!success) {
+        Alert.alert('Erreur', 'Impossible de changer le mode d\'affichage');
+      }
+    },
+    [setDisplayMode]
+  );
+
+  // Get primary vehicle info for display
   const primaryVehicle = vehicles.find(v => v.id === primaryVehicleId);
   const primaryVehicleName = primaryVehicle
     ? `${primaryVehicle.brand} ${primaryVehicle.model}`
     : 'Aucun';
+  const primaryVehiclePhotoUrl = primaryVehicle?.photo_url || null;
 
   // Get unit display text
   const unitDisplayText = settings?.mileage_unit === 'miles' ? 'Miles' : 'Kilometres';
@@ -132,7 +148,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
 
       {/* Back button header when shown as modal */}
       {onClose && (
@@ -212,6 +228,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
           />
         </SettingsSection>
 
+        {/* Debug Section */}
+        <SettingsSection title="Debug (Dev)">
+          <SettingsToggle
+            icon="cloud-offline-outline"
+            label="Simuler mode hors-ligne"
+            description={isOnline ? 'Actuellement en ligne' : `Hors ligne${pendingOperationsCount > 0 ? ` (${pendingOperationsCount} en attente)` : ''}`}
+            value={debugForceOffline}
+            onValueChange={handleDebugOfflineToggle}
+          />
+        </SettingsSection>
+
         {/* Logout Section */}
         <SettingsSection>
           <SettingsItem
@@ -264,6 +291,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
         currentSkin={currentSkin}
         onSelect={handleCarSkinSelect}
         onClose={() => setShowCarSkinSelector(false)}
+        displayMode={displayMode}
+        onDisplayModeChange={handleDisplayModeChange}
+        vehiclePhotoUrl={primaryVehiclePhotoUrl}
       />
     </View>
   );
@@ -272,7 +302,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
   },
   topHeader: {
     flexDirection: 'row',
@@ -280,7 +310,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.screenPaddingHorizontal,
     paddingBottom: spacing.m,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
   },
   backButton: {
     width: 44,

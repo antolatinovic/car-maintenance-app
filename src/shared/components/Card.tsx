@@ -4,20 +4,21 @@
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
-import { colors, shadows, spacing } from '@/core/theme';
+import { colors, shadows, spacing, glass } from '@/core/theme';
 
 interface CardProps {
   children: React.ReactNode;
   style?: ViewStyle;
   onPress?: () => void;
-  variant?: 'default' | 'elevated' | 'outlined';
+  variant?: 'default' | 'elevated' | 'outlined' | 'glass';
 }
 
 export const Card: React.FC<CardProps> = ({ children, style, onPress, variant = 'default' }) => {
   const cardStyle = [
-    styles.card,
+    variant === 'glass' ? styles.cardBase : styles.card,
     variant === 'elevated' && styles.elevated,
     variant === 'outlined' && styles.outlined,
+    variant === 'glass' && styles.glass,
     style,
   ];
 
@@ -33,6 +34,10 @@ export const Card: React.FC<CardProps> = ({ children, style, onPress, variant = 
 };
 
 const styles = StyleSheet.create({
+  cardBase: {
+    borderRadius: spacing.cardRadius,
+    padding: spacing.cardPadding,
+  },
   card: {
     backgroundColor: colors.cardBackground,
     borderRadius: spacing.cardRadius,
@@ -47,6 +52,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     shadowOpacity: 0,
     elevation: 0,
+  },
+  glass: {
+    ...glass.medium,
+    ...shadows.small,
   },
   pressed: {
     opacity: 0.9,

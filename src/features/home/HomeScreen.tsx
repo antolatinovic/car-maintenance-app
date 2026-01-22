@@ -2,7 +2,7 @@
  * Home Screen - Main dashboard view
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   ScrollView,
@@ -12,7 +12,6 @@ import {
   Text,
   ActivityIndicator,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,7 +22,7 @@ import type { TabItem } from '@/shared/components/TabBar';
 import { HomeHeader } from './components/HomeHeader';
 import { UpcomingMaintenance } from './components/UpcomingMaintenance';
 import { CarDisplay } from './components/CarDisplay';
-import { useHomeData } from './hooks/useHomeData';
+import { useHomeData, useVehiclePhoto } from './hooks';
 
 interface HomeScreenProps {
   userProfile?: Profile | null;
@@ -42,6 +41,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { vehicle, maintenances, isLoading, refresh } = useHomeData();
+  const { isUploading, displayMode, pickAndUploadPhoto, toggleDisplayMode } = useVehiclePhoto();
 
   const userName = userProfile
     ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Utilisateur'
@@ -65,14 +65,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     setRefreshing(false);
   };
 
-  const handleNotificationPress = () => {
-    Alert.alert(
-      'Notifications',
-      'Les notifications push seront disponibles prochainement.',
-      [{ text: 'OK' }]
-    );
-  };
-
   const handleAvatarPress = () => {
     onSettingsPress?.();
   };
@@ -85,11 +77,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     onTabChange?.('calendar');
   };
 
+  const handleAddVehiclePhoto = useCallback(() => {
+    if (vehicle?.id) {
+      pickAndUploadPhoto(vehicle.id, () => {
+        // Photo uploaded successfully, refresh data to get updated photo_url
+        refresh();
+      });
+    }
+  }, [vehicle?.id, pickAndUploadPhoto, refresh]);
+
+  const handleToggleDisplayMode = useCallback(() => {
+    toggleDisplayMode();
+  }, [toggleDisplayMode]);
+
   // Loading state
   if (isLoading) {
     return (
       <View style={[styles.container, styles.centered]}>
-        <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" />
         <ActivityIndicator size="large" color={colors.accentPrimary} />
       </View>
     );
@@ -99,13 +104,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   if (!vehicle) {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" />
         <View style={[styles.content, { paddingTop: insets.top }]}>
           <HomeHeader
             userName={userName}
             userAvatar={userAvatar}
-            notificationCount={0}
-            onNotificationPress={handleNotificationPress}
             onAvatarPress={handleAvatarPress}
             onSettingsPress={onSettingsPress}
           />
@@ -136,7 +139,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
 
       <ScrollView
         style={styles.scrollView}
@@ -161,15 +164,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <HomeHeader
           userName={userName}
           userAvatar={userAvatar}
-          notificationCount={2}
-          onNotificationPress={handleNotificationPress}
           onAvatarPress={handleAvatarPress}
           onSettingsPress={onSettingsPress}
         />
 
         {/* Car Display */}
         <View style={styles.carDisplaySection}>
-          <CarDisplay height={280} />
+          <CarDisplay
+            height={280}
+            vehicleId={vehicle.id}
+            vehiclePhotoUrl={vehicle.photo_url}
+            displayMode={displayMode}
+            isUploading={isUploading}
+            onAddPhotoPress={handleAddVehiclePhoto}
+            onToggleMode={handleToggleDisplayMode}
+          />
         </View>
 
         {/* Upcoming Maintenance - 2 items */}
@@ -189,7 +198,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
   },
   centered: {
     justifyContent: 'center',
