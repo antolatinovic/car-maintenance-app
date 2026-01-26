@@ -105,8 +105,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
 
   const handleAddVehicle = useCallback(() => {
     setShowVehicleSelector(false);
-    openVehicleForm();
-  }, [openVehicleForm]);
+    // Petit délai pour laisser le modal se fermer avant d'ouvrir le formulaire
+    setTimeout(() => {
+      if (onClose) {
+        onClose(); // Fermer le modal Settings d'abord
+      }
+      openVehicleForm();
+    }, 100);
+  }, [openVehicleForm, onClose]);
 
   const handleCarSkinSelect = useCallback(
     async (skinId: CarSkinId) => {

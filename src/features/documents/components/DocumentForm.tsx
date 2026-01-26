@@ -26,6 +26,7 @@ interface DocumentFormProps {
   isLoading: boolean;
   onSubmit: (data: Omit<CreateDocumentData, 'vehicle_id' | 'file_path'>) => Promise<void>;
   onCancel: () => void;
+  defaultType?: DocumentType;
 }
 
 interface TypeOption {
@@ -38,7 +39,9 @@ const typeOptions: TypeOption[] = [
   { type: 'invoice', label: 'Facture', icon: 'receipt-outline' },
   { type: 'fuel_receipt', label: 'Carburant', icon: 'water-outline' },
   { type: 'insurance', label: 'Assurance', icon: 'shield-checkmark-outline' },
-  { type: 'administrative', label: 'Administratif', icon: 'document-text-outline' },
+  { type: 'registration', label: 'Carte grise', icon: 'car-outline' },
+  { type: 'license', label: 'Permis', icon: 'id-card-outline' },
+  { type: 'inspection', label: 'Controle tech.', icon: 'clipboard-outline' },
   { type: 'other', label: 'Autre', icon: 'folder-outline' },
 ];
 
@@ -47,9 +50,10 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   isLoading,
   onSubmit,
   onCancel,
+  defaultType,
 }) => {
   const insets = useSafeAreaInsets();
-  const [type, setType] = useState<DocumentType>('invoice');
+  const [type, setType] = useState<DocumentType>(defaultType || 'invoice');
   const [description, setDescription] = useState('');
   const [vendor, setVendor] = useState('');
   const [amount, setAmount] = useState('');

@@ -1,30 +1,60 @@
 /**
- * Documents screen - main entry point for document management
+ * Documents screen - Complete redesign with quick access and sections
  */
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
+  RefreshControl,
+  TextInput,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
+import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
 import { getPrimaryVehicle } from '@/services/vehicleService';
-import { useDocuments, useDocumentScanner, useDocumentSearch } from './hooks';
+import { useDocuments, useDocumentScanner } from './hooks';
 import {
-  DocumentsHeader,
-  DocumentFilters,
-  DocumentList,
   DocumentScanner,
   DocumentForm,
   DocumentViewer,
+  QuickAccessCards,
+  DocumentSection,
 } from './components';
-import type { Document } from '@/core/types/database';
+import type { Document, DocumentType } from '@/core/types/database';
 import type { ScannedImage } from './hooks/useDocumentScanner';
 import type { CreateDocumentData } from '@/services/documentService';
 
 type ScreenMode = 'list' | 'scanner' | 'form' | 'viewer';
 
+// Document types to show in sections (in order)
+const sectionTypes: DocumentType[] = [
+  'invoice',
+  'fuel_receipt',
+  'insurance',
+  'registration',
+  'license',
+  'inspection',
+  'other',
+];
+
 export const DocumentsScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [vehicleLoading, setVehicleLoading] = useState(true);
+  const [mode, setMode] = useState<ScreenMode>('list');
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [scannedImage, setScannedImage] = useState<ScannedImage | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [preselectedType, setPreselectedType] = useState<DocumentType | undefined>();
 
   // Fetch primary vehicle on mount
   useEffect(() => {
@@ -38,26 +68,55 @@ export const DocumentsScreen: React.FC = () => {
     };
     fetchVehicle();
   }, []);
-  const [mode, setMode] = useState<ScreenMode>('list');
-  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [scannedImage, setScannedImage] = useState<ScannedImage | null>(null);
 
   const { documents, isLoading, refresh, addDocument, removeDocument } = useDocuments(vehicleId);
-
-  const {
-    filters,
-    setSearchQuery,
-    setTypeFilter,
-    clearFilters,
-    filterDocuments,
-    hasActiveFilters,
-  } = useDocumentSearch();
-
   const scanner = useDocumentScanner();
 
-  const filteredDocuments = useMemo(() => filterDocuments(documents), [documents, filterDocuments]);
+  // Group documents by type
+  const groupedDocuments = useMemo(() => {
+    const grouped: Record<DocumentType, Document[]> = {
+      insurance: [],
+      registration: [],
+      license: [],
+      inspection: [],
+      invoice: [],
+      fuel_receipt: [],
+      other: [],
+    };
+
+    const query = searchQuery.toLowerCase().trim();
+
+    documents.forEach(doc => {
+      // Apply search filter
+      if (query) {
+        const matchesSearch =
+          doc.description?.toLowerCase().includes(query) ||
+          doc.vendor?.toLowerCase().includes(query) ||
+          doc.notes?.toLowerCase().includes(query);
+        if (!matchesSearch) return;
+      }
+
+      if (grouped[doc.type]) {
+        grouped[doc.type].push(doc);
+      } else {
+        grouped.other.push(doc);
+      }
+    });
+
+    return grouped;
+  }, [documents, searchQuery]);
+
+  const totalFilteredCount = useMemo(() => {
+    return Object.values(groupedDocuments).reduce((sum, docs) => sum + docs.length, 0);
+  }, [groupedDocuments]);
 
   const handleAddPress = useCallback(() => {
+    setPreselectedType(undefined);
+    setMode('scanner');
+  }, []);
+
+  const handleAddWithType = useCallback((type: DocumentType) => {
+    setPreselectedType(type);
     setMode('scanner');
   }, []);
 
@@ -68,6 +127,7 @@ export const DocumentsScreen: React.FC = () => {
 
   const handleScanCancel = useCallback(() => {
     setMode('list');
+    setPreselectedType(undefined);
     scanner.clearScannedImage();
   }, [scanner]);
 
@@ -79,6 +139,7 @@ export const DocumentsScreen: React.FC = () => {
 
       if (result) {
         setScannedImage(null);
+        setPreselectedType(undefined);
         setMode('list');
         scanner.clearScannedImage();
       }
@@ -88,6 +149,7 @@ export const DocumentsScreen: React.FC = () => {
 
   const handleFormCancel = useCallback(() => {
     setScannedImage(null);
+    setPreselectedType(undefined);
     setMode('list');
     scanner.clearScannedImage();
   }, [scanner]);
@@ -135,16 +197,19 @@ export const DocumentsScreen: React.FC = () => {
     ]);
   }, [selectedDocument, removeDocument]);
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
+  }, [refresh]);
+
   // Loading vehicle
   if (vehicleLoading) {
     return (
       <View style={styles.container}>
-        <DocumentsHeader
-          searchQuery=""
-          onSearchChange={() => {}}
-          onAddPress={() => {}}
-          documentCount={0}
-        />
+        <View style={[styles.header, { paddingTop: insets.top + spacing.m }]}>
+          <Text style={styles.title}>Documents</Text>
+        </View>
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color={colors.accentPrimary} />
         </View>
@@ -156,12 +221,9 @@ export const DocumentsScreen: React.FC = () => {
   if (!vehicleId) {
     return (
       <View style={styles.container}>
-        <DocumentsHeader
-          searchQuery=""
-          onSearchChange={() => {}}
-          onAddPress={() => {}}
-          documentCount={0}
-        />
+        <View style={[styles.header, { paddingTop: insets.top + spacing.m }]}>
+          <Text style={styles.title}>Documents</Text>
+        </View>
         <View style={styles.centerContent}>
           <View style={styles.noVehicleIcon}>
             <Ionicons name="car-outline" size={48} color={colors.textTertiary} />
@@ -188,6 +250,7 @@ export const DocumentsScreen: React.FC = () => {
         isLoading={isLoading}
         onSubmit={handleFormSubmit}
         onCancel={handleFormCancel}
+        defaultType={preselectedType}
       />
     );
   }
@@ -204,28 +267,135 @@ export const DocumentsScreen: React.FC = () => {
   }
 
   // List mode (default)
+  const renderSearchBar = () => {
+    const searchContent = (
+      <>
+        <Ionicons name="search-outline" size={20} color={colors.textTertiary} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Rechercher un document..."
+          placeholderTextColor={colors.textTertiary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          returnKeyType="search"
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={20} color={colors.textTertiary} />
+          </TouchableOpacity>
+        )}
+      </>
+    );
+
+    if (Platform.OS === 'ios') {
+      return (
+        <View style={styles.searchWrapper}>
+          <BlurView intensity={20} tint="light" style={styles.searchBlur}>
+            <View style={styles.searchContent}>{searchContent}</View>
+          </BlurView>
+        </View>
+      );
+    }
+
+    return <View style={[styles.searchWrapper, styles.searchAndroid]}>{searchContent}</View>;
+  };
+
+  const hasAnyDocuments = documents.length > 0;
+  const hasFilteredDocuments = totalFilteredCount > 0;
+
   return (
     <View style={styles.container}>
-      <DocumentsHeader
-        searchQuery={filters.query}
-        onSearchChange={setSearchQuery}
-        onAddPress={handleAddPress}
-        documentCount={filteredDocuments.length}
-      />
-
-      <DocumentList
-        documents={filteredDocuments}
-        isLoading={isLoading}
-        hasFilters={hasActiveFilters}
-        onDocumentPress={handleDocumentPress}
-        onDocumentLongPress={handleDocumentLongPress}
-        onRefresh={refresh}
-        onAddDocument={handleAddPress}
-        onClearFilters={clearFilters}
-        ListHeaderComponent={
-          <DocumentFilters selectedType={filters.type} onSelectType={setTypeFilter} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.accentPrimary}
+            colors={[colors.accentPrimary]}
+          />
         }
-      />
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: insets.top + spacing.m }]}>
+          <View style={styles.titleRow}>
+            <View>
+              <Text style={styles.title}>Documents</Text>
+              <Text style={styles.subtitle}>
+                {documents.length} document{documents.length !== 1 ? 's' : ''}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.addButtonWrapper}
+              onPress={handleAddPress}
+              activeOpacity={0.7}
+            >
+              {Platform.OS === 'ios' ? (
+                <BlurView intensity={25} tint="light" style={styles.addButtonBlur}>
+                  <Ionicons name="add" size={24} color={colors.accentPrimary} />
+                </BlurView>
+              ) : (
+                <View style={styles.addButtonAndroid}>
+                  <Ionicons name="add" size={24} color={colors.accentPrimary} />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Quick Access Cards */}
+        <QuickAccessCards
+          documents={groupedDocuments}
+          onDocumentPress={handleDocumentPress}
+          onAddPress={handleAddWithType}
+        />
+
+        {/* Search Bar */}
+        <View style={styles.searchSection}>{renderSearchBar()}</View>
+
+        {/* Document Sections or Empty State */}
+        {hasAnyDocuments ? (
+          hasFilteredDocuments ? (
+            <View style={styles.sectionsContainer}>
+              {sectionTypes.map(type => (
+                <DocumentSection
+                  key={type}
+                  type={type}
+                  documents={groupedDocuments[type]}
+                  onDocumentPress={handleDocumentPress}
+                  onDocumentLongPress={handleDocumentLongPress}
+                  defaultExpanded={groupedDocuments[type].length > 0}
+                />
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptySearchContainer}>
+              <Ionicons name="search-outline" size={48} color={colors.textTertiary} />
+              <Text style={styles.emptySearchTitle}>Aucun resultat</Text>
+              <Text style={styles.emptySearchText}>
+                Aucun document ne correspond a "{searchQuery}"
+              </Text>
+              <TouchableOpacity style={styles.clearSearchButton} onPress={() => setSearchQuery('')}>
+                <Text style={styles.clearSearchText}>Effacer la recherche</Text>
+              </TouchableOpacity>
+            </View>
+          )
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              Scannez vos factures, cartes grises et autres documents pour les conserver
+            </Text>
+            <TouchableOpacity style={styles.addFirstButton} onPress={handleAddPress}>
+              <Ionicons name="add" size={20} color={colors.textOnColor} />
+              <Text style={styles.addFirstText}>Ajouter un document</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Bottom padding for tab bar */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
     </View>
   );
 };
@@ -233,7 +403,50 @@ export const DocumentsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  header: {
+    paddingHorizontal: spacing.screenPaddingHorizontal,
+    paddingBottom: spacing.l,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  title: {
+    ...typography.h1,
+    color: colors.textPrimary,
+  },
+  subtitle: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  addButtonWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  addButtonBlur: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  addButtonAndroid: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   centerContent: {
     flex: 1,
@@ -260,5 +473,97 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  searchSection: {
+    paddingHorizontal: spacing.screenPaddingHorizontal,
+    marginBottom: spacing.l,
+  },
+  searchWrapper: {
+    borderRadius: spacing.inputRadius,
+    overflow: 'hidden',
+  },
+  searchBlur: {
+    borderRadius: spacing.inputRadius,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  searchContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.m,
+    height: spacing.inputHeight,
+    gap: spacing.s,
+  },
+  searchAndroid: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: spacing.inputRadius,
+    paddingHorizontal: spacing.m,
+    height: spacing.inputHeight,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+    gap: spacing.s,
+  },
+  searchInput: {
+    flex: 1,
+    ...typography.body,
+    color: colors.textPrimary,
+  },
+  sectionsContainer: {
+    paddingTop: spacing.s,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl,
+  },
+  emptyText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.l,
+  },
+  addFirstButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.accentPrimary,
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.m,
+    borderRadius: spacing.buttonRadius,
+    gap: spacing.s,
+  },
+  addFirstText: {
+    ...typography.bodySemiBold,
+    color: colors.textOnColor,
+  },
+  emptySearchContainer: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.xxxl,
+    paddingVertical: spacing.xxxl,
+  },
+  emptySearchTitle: {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginTop: spacing.l,
+    marginBottom: spacing.s,
+  },
+  emptySearchText: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.l,
+  },
+  clearSearchButton: {
+    paddingHorizontal: spacing.l,
+    paddingVertical: spacing.m,
+  },
+  clearSearchText: {
+    ...typography.bodySemiBold,
+    color: colors.accentPrimary,
+  },
+  bottomPadding: {
+    height: spacing.tabBarHeight + spacing.xl,
   },
 });

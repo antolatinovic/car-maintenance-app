@@ -1,11 +1,13 @@
 /**
  * Document card component - displays a single document
+ * Glassmorphism design aligned with home screen
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows, spacing, typography } from '@/core/theme';
+import { colors, spacing, typography } from '@/core/theme';
+import { GlassCard } from '@/shared/components';
 import { getDocumentUrl } from '@/services/documentService';
 import type { Document, DocumentType } from '@/core/types/database';
 
@@ -23,6 +25,26 @@ const typeConfig: Record<
     color: string;
   }
 > = {
+  insurance: {
+    label: 'Assurance',
+    icon: 'shield-checkmark-outline',
+    color: colors.accentSecondary,
+  },
+  registration: {
+    label: 'Carte grise',
+    icon: 'car-outline',
+    color: colors.accentSuccess,
+  },
+  license: {
+    label: 'Permis',
+    icon: 'id-card-outline',
+    color: '#8B5CF6',
+  },
+  inspection: {
+    label: 'Controle technique',
+    icon: 'clipboard-outline',
+    color: colors.accentWarning,
+  },
   invoice: {
     label: 'Facture',
     icon: 'receipt-outline',
@@ -32,16 +54,6 @@ const typeConfig: Record<
     label: 'Carburant',
     icon: 'water-outline',
     color: colors.accentSecondary,
-  },
-  insurance: {
-    label: 'Assurance',
-    icon: 'shield-checkmark-outline',
-    color: colors.accentSuccess,
-  },
-  administrative: {
-    label: 'Administratif',
-    icon: 'document-text-outline',
-    color: colors.accentWarning,
   },
   other: {
     label: 'Autre',
@@ -74,68 +86,74 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onPress, o
 
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={styles.wrapper}
       onPress={() => onPress(document)}
       onLongPress={() => onLongPress?.(document)}
       activeOpacity={0.7}
     >
-      <View style={styles.thumbnailContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.thumbnail} resizeMode="cover" />
-        <View style={[styles.typeOverlay, { backgroundColor: config.color }]}>
-          <Ionicons name={config.icon} size={14} color={colors.textOnColor} />
-        </View>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title} numberOfLines={1}>
-            {document.description || config.label}
-          </Text>
-          {document.amount !== null && (
-            <Text style={styles.amount}>{formatAmount(document.amount)}</Text>
-          )}
-        </View>
-
-        <View style={styles.details}>
-          {document.vendor && (
-            <View style={styles.detailRow}>
-              <Ionicons name="storefront-outline" size={14} color={colors.textTertiary} />
-              <Text style={styles.detailText} numberOfLines={1}>
-                {document.vendor}
-              </Text>
+      <GlassCard variant="light" style={styles.container}>
+        <View style={styles.cardContent}>
+          <View style={styles.thumbnailContainer}>
+            <Image source={{ uri: imageUrl }} style={styles.thumbnail} resizeMode="cover" />
+            <View style={[styles.typeOverlay, { backgroundColor: config.color }]}>
+              <Ionicons name={config.icon} size={14} color={colors.textOnColor} />
             </View>
-          )}
-          <View style={styles.detailRow}>
-            <Ionicons name="calendar-outline" size={14} color={colors.textTertiary} />
-            <Text style={styles.detailText}>{formatDate(document.date)}</Text>
           </View>
-        </View>
 
-        <View style={styles.badge}>
-          <Text style={[styles.badgeText, { color: config.color }]}>{config.label}</Text>
-        </View>
-      </View>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.title} numberOfLines={1}>
+                {document.description || config.label}
+              </Text>
+              {document.amount !== null && (
+                <Text style={styles.amount}>{formatAmount(document.amount)}</Text>
+              )}
+            </View>
 
-      <Ionicons
-        name="chevron-forward"
-        size={20}
-        color={colors.textTertiary}
-        style={styles.chevron}
-      />
+            <View style={styles.details}>
+              {document.vendor && (
+                <View style={styles.detailRow}>
+                  <Ionicons name="storefront-outline" size={14} color={colors.textTertiary} />
+                  <Text style={styles.detailText} numberOfLines={1}>
+                    {document.vendor}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.detailRow}>
+                <Ionicons name="calendar-outline" size={14} color={colors.textTertiary} />
+                <Text style={styles.detailText}>{formatDate(document.date)}</Text>
+              </View>
+            </View>
+
+            <View style={[styles.badge, { backgroundColor: `${config.color}15` }]}>
+              <Text style={[styles.badgeText, { color: config.color }]}>{config.label}</Text>
+            </View>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={colors.textTertiary}
+            style={styles.chevron}
+          />
+        </View>
+      </GlassCard>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: colors.cardBackground,
-    borderRadius: spacing.cardRadius,
-    padding: spacing.m,
+  wrapper: {
     marginHorizontal: spacing.screenPaddingHorizontal,
     marginBottom: spacing.m,
+  },
+  container: {
+    borderRadius: spacing.cardRadius,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    padding: spacing.m,
     alignItems: 'center',
-    ...shadows.small,
   },
   thumbnailContainer: {
     width: 60,
@@ -194,7 +212,6 @@ const styles = StyleSheet.create({
   badge: {
     marginTop: spacing.s,
     alignSelf: 'flex-start',
-    backgroundColor: colors.backgroundTertiary,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
     borderRadius: spacing.cardRadiusSmall,

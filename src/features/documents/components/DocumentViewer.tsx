@@ -25,10 +25,12 @@ interface DocumentViewerProps {
 }
 
 const typeLabels: Record<DocumentType, string> = {
+  insurance: 'Assurance',
+  registration: 'Carte grise',
+  license: 'Permis',
+  inspection: 'Controle technique',
   invoice: 'Facture',
   fuel_receipt: 'Carburant',
-  insurance: 'Assurance',
-  administrative: 'Administratif',
   other: 'Autre',
 };
 

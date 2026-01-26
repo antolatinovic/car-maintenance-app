@@ -17,7 +17,14 @@ export type MaintenanceCategory =
 export type ReminderType = 'date' | 'mileage' | 'both';
 export type RecurrenceType = 'none' | 'monthly' | 'yearly' | 'km_based';
 export type ScheduleStatus = 'pending' | 'completed' | 'overdue';
-export type DocumentType = 'invoice' | 'fuel_receipt' | 'insurance' | 'administrative' | 'other';
+export type DocumentType =
+  | 'insurance'
+  | 'registration'
+  | 'license'
+  | 'inspection'
+  | 'invoice'
+  | 'fuel_receipt'
+  | 'other';
 export type ExpenseType =
   | 'fuel'
   | 'maintenance'

@@ -284,6 +284,56 @@ export const getDocumentUrl = (filePath: string): string => {
 };
 
 /**
+ * Get documents grouped by type
+ */
+export const getDocumentsGroupedByType = async (
+  vehicleId: string
+): Promise<ServiceResult<Record<DocumentType, Document[]>>> => {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { data: null, error: { message: 'Non authentifie' } };
+    }
+
+    const { data, error } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('vehicle_id', vehicleId)
+      .order('date', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return { data: null, error: { message: error.message, code: error.code } };
+    }
+
+    // Group documents by type
+    const grouped: Record<DocumentType, Document[]> = {
+      insurance: [],
+      registration: [],
+      license: [],
+      inspection: [],
+      invoice: [],
+      fuel_receipt: [],
+      other: [],
+    };
+
+    (data as Document[]).forEach(doc => {
+      if (grouped[doc.type]) {
+        grouped[doc.type].push(doc);
+      } else {
+        grouped.other.push(doc);
+      }
+    });
+
+    return { data: grouped, error: null };
+  } catch (error) {
+    return { data: null, error: { message: 'Erreur lors de la recuperation des documents' } };
+  }
+};
+
+/**
  * Search documents by description or vendor
  */
 export const searchDocuments = async (
