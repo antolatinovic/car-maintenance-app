@@ -359,7 +359,9 @@ export const DocumentsScreen: React.FC = () => {
             <View>
               <Text style={styles.title}>Documents</Text>
               <Text style={styles.subtitle}>
-                {documents.length} document{documents.length !== 1 ? 's' : ''}
+                {searchQuery.trim()
+                  ? `${totalFilteredCount} resultat${totalFilteredCount !== 1 ? 's' : ''}`
+                  : `${documents.length} document${documents.length !== 1 ? 's' : ''}`}
               </Text>
             </View>
             <TouchableOpacity

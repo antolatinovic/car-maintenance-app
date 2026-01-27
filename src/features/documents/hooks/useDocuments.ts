@@ -96,7 +96,9 @@ export const useDocuments = (vehicleId: string | null): UseDocumentsReturn => {
         const uploadResult = await uploadDocumentFile(vehicleId, fileUri, fileName);
 
         if (uploadResult.error || !uploadResult.data) {
-          const errorMsg = uploadResult.error?.message || 'Erreur lors du telechargement';
+          const errorMsg =
+            'Erreur upload fichier: ' +
+            (uploadResult.error?.message || 'Erreur lors du telechargement');
           setState(prev => ({
             ...prev,
             isLoading: false,
@@ -113,7 +115,9 @@ export const useDocuments = (vehicleId: string | null): UseDocumentsReturn => {
         });
 
         if (createResult.error || !createResult.data) {
-          const errorMsg = createResult.error?.message || 'Erreur lors de la creation';
+          const errorMsg =
+            'Erreur creation document: ' +
+            (createResult.error?.message || 'Erreur lors de la creation');
           setState(prev => ({
             ...prev,
             isLoading: false,

@@ -171,19 +171,25 @@ CREATE POLICY "messages_delete_own" ON public.messages
 -- Bucket: documents
 -- ---------------------------------------------------------------------------
 CREATE POLICY "documents_storage_insert" ON storage.objects
-  FOR INSERT WITH CHECK (
+  FOR INSERT TO authenticated WITH CHECK (
     bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 CREATE POLICY "documents_storage_select" ON storage.objects
-  FOR SELECT USING (
+  FOR SELECT TO authenticated USING (
+    bucket_id = 'documents'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+CREATE POLICY "documents_storage_update" ON storage.objects
+  FOR UPDATE TO authenticated USING (
     bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 CREATE POLICY "documents_storage_delete" ON storage.objects
-  FOR DELETE USING (
+  FOR DELETE TO authenticated USING (
     bucket_id = 'documents'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
@@ -192,19 +198,25 @@ CREATE POLICY "documents_storage_delete" ON storage.objects
 -- Bucket: vehicles
 -- ---------------------------------------------------------------------------
 CREATE POLICY "vehicles_storage_insert" ON storage.objects
-  FOR INSERT WITH CHECK (
+  FOR INSERT TO authenticated WITH CHECK (
     bucket_id = 'vehicles'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 CREATE POLICY "vehicles_storage_select" ON storage.objects
-  FOR SELECT USING (
+  FOR SELECT TO authenticated USING (
+    bucket_id = 'vehicles'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+CREATE POLICY "vehicles_storage_update" ON storage.objects
+  FOR UPDATE TO authenticated USING (
     bucket_id = 'vehicles'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 CREATE POLICY "vehicles_storage_delete" ON storage.objects
-  FOR DELETE USING (
+  FOR DELETE TO authenticated USING (
     bucket_id = 'vehicles'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
@@ -213,19 +225,25 @@ CREATE POLICY "vehicles_storage_delete" ON storage.objects
 -- Bucket: avatars
 -- ---------------------------------------------------------------------------
 CREATE POLICY "avatars_storage_insert" ON storage.objects
-  FOR INSERT WITH CHECK (
+  FOR INSERT TO authenticated WITH CHECK (
     bucket_id = 'avatars'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 CREATE POLICY "avatars_storage_select" ON storage.objects
-  FOR SELECT USING (
+  FOR SELECT TO authenticated USING (
+    bucket_id = 'avatars'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+CREATE POLICY "avatars_storage_update" ON storage.objects
+  FOR UPDATE TO authenticated USING (
     bucket_id = 'avatars'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 
 CREATE POLICY "avatars_storage_delete" ON storage.objects
-  FOR DELETE USING (
+  FOR DELETE TO authenticated USING (
     bucket_id = 'avatars'
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
@@ -290,3 +308,43 @@ $$;
 
 -- Grant execute permission to authenticated users
 GRANT EXECUTE ON FUNCTION public.delete_user_account() TO authenticated;
+
+
+-- =============================================================================
+-- 4. DIAGNOSTIC QUERIES (run these to verify policies are correctly applied)
+-- =============================================================================
+
+-- Check which tables have RLS enabled
+-- SELECT schemaname, tablename, rowsecurity
+-- FROM pg_tables
+-- WHERE schemaname = 'public'
+-- ORDER BY tablename;
+
+-- List all policies on your tables
+-- SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual, with_check
+-- FROM pg_policies
+-- WHERE schemaname IN ('public', 'storage')
+-- ORDER BY tablename, policyname;
+
+-- Check storage.objects policies specifically
+-- SELECT policyname, cmd, qual, with_check
+-- FROM pg_policies
+-- WHERE tablename = 'objects' AND schemaname = 'storage'
+-- ORDER BY policyname;
+
+-- =============================================================================
+-- 5. FIX: If RLS is enabled but policies are missing, drop and re-create
+-- =============================================================================
+-- If you get "new row violates row-level security policy" errors, run the
+-- diagnostic queries above FIRST to check if policies exist.
+--
+-- If policies are missing (RLS enabled but no CREATE POLICY was run),
+-- you can either:
+-- a) Re-run the CREATE POLICY statements above
+-- b) If they fail with "policy already exists", drop them first:
+--
+-- DROP POLICY IF EXISTS "documents_insert_own" ON public.documents;
+-- DROP POLICY IF EXISTS "documents_select_own" ON public.documents;
+-- DROP POLICY IF EXISTS "documents_update_own" ON public.documents;
+-- DROP POLICY IF EXISTS "documents_delete_own" ON public.documents;
+-- Then re-run the CREATE POLICY statements.
