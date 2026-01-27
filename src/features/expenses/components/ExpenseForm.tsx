@@ -1,5 +1,5 @@
 /**
- * Expense form modal for adding/editing expenses
+ * Expense form modal for adding/editing expenses with gradient accents
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,8 +16,9 @@ import {
   Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '@/core/theme';
+import { colors, gradients, spacing, typography } from '@/core/theme';
 import type { ExpenseType, Expense } from '@/core/types/database';
 import type { CreateExpenseData } from '@/services/expenseService';
 
@@ -121,15 +122,23 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
           </TouchableOpacity>
           <Text style={styles.title}>{isEditing ? 'Modifier la depense' : 'Nouvelle depense'}</Text>
           <TouchableOpacity
-            style={[styles.headerButton, styles.saveButton]}
+            style={styles.saveButtonWrapper}
             onPress={handleSubmit}
             disabled={isLoading || !amount}
+            activeOpacity={0.8}
           >
-            {isLoading ? (
-              <ActivityIndicator size="small" color={colors.textOnColor} />
-            ) : (
-              <Ionicons name="checkmark" size={24} color={colors.textOnColor} />
-            )}
+            <LinearGradient
+              colors={gradients.violet}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.saveButton, (isLoading || !amount) && styles.saveButtonDisabled]}
+            >
+              {isLoading ? (
+                <ActivityIndicator size="small" color={colors.textOnColor} />
+              ) : (
+                <Ionicons name="checkmark" size={24} color={colors.textOnColor} />
+              )}
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
@@ -140,24 +149,35 @@ export const ExpenseForm: React.FC<ExpenseFormProps> = ({
         >
           <Text style={styles.sectionTitle}>Type de depense</Text>
           <View style={styles.typeGrid}>
-            {typeOptions.map(option => (
-              <TouchableOpacity
-                key={option.type}
-                style={[styles.typeChip, type === option.type && styles.typeChipSelected]}
-                onPress={() => setType(option.type)}
-              >
-                <Ionicons
-                  name={option.icon}
-                  size={18}
-                  color={type === option.type ? colors.textOnColor : colors.textSecondary}
-                />
-                <Text
-                  style={[styles.typeChipText, type === option.type && styles.typeChipTextSelected]}
+            {typeOptions.map(option => {
+              const isSelected = type === option.type;
+              return (
+                <TouchableOpacity
+                  key={option.type}
+                  onPress={() => setType(option.type)}
+                  activeOpacity={0.7}
                 >
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  {isSelected ? (
+                    <LinearGradient
+                      colors={gradients.violet}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.typeChip}
+                    >
+                      <Ionicons name={option.icon} size={18} color={colors.textOnColor} />
+                      <Text style={[styles.typeChipText, styles.typeChipTextSelected]}>
+                        {option.label}
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <View style={[styles.typeChip, styles.typeChipDefault]}>
+                      <Ionicons name={option.icon} size={18} color={colors.textSecondary} />
+                      <Text style={styles.typeChipText}>{option.label}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           <Text style={styles.sectionTitle}>Informations</Text>
@@ -243,9 +263,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  saveButton: {
-    backgroundColor: colors.accentPrimary,
+  saveButtonWrapper: {
+    width: 44,
+    height: 44,
     borderRadius: 22,
+    overflow: 'hidden',
+  },
+  saveButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
   },
   title: {
     ...typography.h3,
@@ -259,7 +291,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.captionSemiBold,
-    color: colors.textSecondary,
+    color: colors.accentPrimary,
     marginBottom: spacing.m,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -277,13 +309,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     borderRadius: spacing.buttonRadiusSmall,
-    backgroundColor: colors.cardBackground,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  typeChipSelected: {
-    backgroundColor: colors.accentPrimary,
-    borderColor: colors.accentPrimary,
+  typeChipDefault: {
+    backgroundColor: colors.backgroundTertiary,
   },
   typeChipText: {
     ...typography.captionMedium,
@@ -297,11 +325,12 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.captionMedium,
-    color: colors.textSecondary,
+    color: colors.accentPrimary,
     marginBottom: spacing.s,
+    fontWeight: '600',
   },
   input: {
-    backgroundColor: colors.cardBackground,
+    backgroundColor: colors.inputBackground,
     borderRadius: spacing.inputRadius,
     paddingHorizontal: spacing.inputPaddingHorizontal,
     height: spacing.inputHeight,
@@ -313,7 +342,7 @@ const styles = StyleSheet.create({
   inputWithSuffix: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.cardBackground,
+    backgroundColor: colors.inputBackground,
     borderRadius: spacing.inputRadius,
     borderWidth: 1,
     borderColor: colors.border,
@@ -322,6 +351,7 @@ const styles = StyleSheet.create({
   inputWithoutBorder: {
     flex: 1,
     borderWidth: 0,
+    backgroundColor: colors.transparent,
   },
   suffix: {
     ...typography.bodyMedium,

@@ -1,5 +1,5 @@
 /**
- * Expense card component - displays a single expense
+ * Expense card component - displays a single expense with colored left border
  */
 
 import React from 'react';
@@ -90,7 +90,9 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onPress, onLo
       onLongPress={() => onLongPress?.(expense)}
       activeOpacity={0.7}
     >
-      <View style={[styles.iconContainer, { backgroundColor: `${config.color}15` }]}>
+      <View style={[styles.colorStripe, { backgroundColor: config.color }]} />
+
+      <View style={[styles.iconContainer, { backgroundColor: `${config.color}20` }]}>
         <Ionicons name={config.icon} size={24} color={config.color} />
       </View>
 
@@ -99,7 +101,9 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onPress, onLo
           <Text style={styles.title} numberOfLines={1}>
             {expense.description || config.label}
           </Text>
-          <Text style={styles.amount}>{formatAmount(expense.amount)}</Text>
+          <Text style={[styles.amount, { color: config.color }]}>
+            {formatAmount(expense.amount)}
+          </Text>
         </View>
 
         <View style={styles.details}>
@@ -115,7 +119,7 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onPress, onLo
           )}
         </View>
 
-        <View style={styles.badge}>
+        <View style={[styles.badge, { backgroundColor: `${config.color}15` }]}>
           <Text style={[styles.badgeText, { color: config.color }]}>{config.label}</Text>
         </View>
       </View>
@@ -139,12 +143,22 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.screenPaddingHorizontal,
     marginBottom: spacing.m,
     alignItems: 'center',
+    overflow: 'hidden',
     ...shadows.small,
   },
+  colorStripe: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    borderTopLeftRadius: spacing.cardRadius,
+    borderBottomLeftRadius: spacing.cardRadius,
+  },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -164,8 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   amount: {
-    ...typography.bodySemiBold,
-    color: colors.accentPrimary,
+    ...typography.h3,
     marginLeft: spacing.s,
   },
   details: {
@@ -184,7 +197,6 @@ const styles = StyleSheet.create({
   badge: {
     marginTop: spacing.s,
     alignSelf: 'flex-start',
-    backgroundColor: colors.backgroundTertiary,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
     borderRadius: spacing.cardRadiusSmall,

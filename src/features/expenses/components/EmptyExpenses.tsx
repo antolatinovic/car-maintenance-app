@@ -1,11 +1,12 @@
 /**
- * Empty state component for expenses
+ * Empty state component for expenses with gradient CTA button
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '@/core/theme';
+import { colors, gradients, shadows, spacing, typography } from '@/core/theme';
 
 interface EmptyExpensesProps {
   hasFilters?: boolean;
@@ -38,15 +39,22 @@ export const EmptyExpenses: React.FC<EmptyExpensesProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <Ionicons name="wallet-outline" size={48} color={colors.textTertiary} />
+        <Ionicons name="wallet-outline" size={48} color={colors.accentPrimary} />
       </View>
       <Text style={styles.title}>Aucune depense</Text>
       <Text style={styles.description}>
         Commencez a suivre vos depenses pour mieux gerer votre budget auto
       </Text>
-      <TouchableOpacity style={styles.primaryButton} onPress={onAddExpense}>
-        <Ionicons name="add" size={20} color={colors.textOnColor} />
-        <Text style={styles.primaryButtonText}>Ajouter une depense</Text>
+      <TouchableOpacity onPress={onAddExpense} activeOpacity={0.8} style={styles.primaryButtonWrapper}>
+        <LinearGradient
+          colors={gradients.violet}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.primaryButton}
+        >
+          <Ionicons name="add" size={20} color={colors.textOnColor} />
+          <Text style={styles.primaryButtonText}>Ajouter une depense</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </View>
   );
@@ -64,7 +72,7 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: colors.backgroundTertiary,
+    backgroundColor: `${colors.accentPrimary}10`,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xl,
@@ -89,11 +97,14 @@ const styles = StyleSheet.create({
     ...typography.button,
     color: colors.accentPrimary,
   },
+  primaryButtonWrapper: {
+    borderRadius: spacing.buttonRadius,
+    ...shadows.medium,
+  },
   primaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.s,
-    backgroundColor: colors.accentPrimary,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.m,
     borderRadius: spacing.buttonRadius,

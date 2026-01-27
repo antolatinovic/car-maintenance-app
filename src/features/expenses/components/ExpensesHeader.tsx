@@ -1,21 +1,25 @@
 /**
- * Expenses screen header with title and add button
+ * Expenses screen header with title, gradient add button and blur analytics button
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '@/core/theme';
+import { colors, gradients, spacing, typography } from '@/core/theme';
 
 interface ExpensesHeaderProps {
   monthlyTotal: number;
+  expenseCount?: number;
   onAddPress: () => void;
   onAnalyticsPress?: () => void;
 }
 
 export const ExpensesHeader: React.FC<ExpensesHeaderProps> = ({
   monthlyTotal,
+  expenseCount,
   onAddPress,
   onAnalyticsPress,
 }) => {
@@ -35,15 +39,37 @@ export const ExpensesHeader: React.FC<ExpensesHeaderProps> = ({
         <View>
           <Text style={styles.title}>Depenses</Text>
           <Text style={styles.subtitle}>{formatAmount(monthlyTotal)} ce mois</Text>
+          {expenseCount !== undefined && expenseCount > 0 && (
+            <Text style={styles.countText}>{expenseCount} depense{expenseCount > 1 ? 's' : ''}</Text>
+          )}
         </View>
         <View style={styles.actions}>
           {onAnalyticsPress && (
-            <TouchableOpacity style={styles.analyticsButton} onPress={onAnalyticsPress}>
-              <Ionicons name="bar-chart-outline" size={22} color={colors.accentPrimary} />
+            <TouchableOpacity
+              style={styles.analyticsButton}
+              onPress={onAnalyticsPress}
+              activeOpacity={0.7}
+            >
+              {Platform.OS === 'ios' ? (
+                <BlurView intensity={25} tint="light" style={styles.analyticsBlur}>
+                  <Ionicons name="bar-chart-outline" size={22} color={colors.accentPrimary} />
+                </BlurView>
+              ) : (
+                <View style={styles.analyticsAndroid}>
+                  <Ionicons name="bar-chart-outline" size={22} color={colors.accentPrimary} />
+                </View>
+              )}
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.addButton} onPress={onAddPress}>
-            <Ionicons name="add" size={24} color={colors.textOnColor} />
+          <TouchableOpacity style={styles.addButton} onPress={onAddPress} activeOpacity={0.8}>
+            <LinearGradient
+              colors={gradients.violet}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.addButtonGradient}
+            >
+              <Ionicons name="add" size={24} color={colors.textOnColor} />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       </View>
@@ -72,6 +98,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     fontWeight: '600',
   },
+  countText: {
+    ...typography.small,
+    color: colors.textTertiary,
+    marginTop: spacing.xs,
+  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,15 +112,34 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.backgroundTertiary,
+    overflow: 'hidden',
+  },
+  analyticsBlur: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  analyticsAndroid: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   addButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.accentPrimary,
+    overflow: 'hidden',
+  },
+  addButtonGradient: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

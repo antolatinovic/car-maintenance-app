@@ -1,11 +1,12 @@
 /**
- * Expense type filter chips
+ * Expense type filter chips with gradient selection
  */
 
 import React from 'react';
-import { Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography } from '@/core/theme';
+import { colors, gradients, spacing, typography } from '@/core/theme';
 import type { ExpenseType } from '@/core/types/database';
 
 interface FilterOption {
@@ -42,18 +43,25 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({ selectedType, on
         return (
           <TouchableOpacity
             key={option.type || 'all'}
-            style={[styles.chip, isSelected && styles.chipSelected]}
             onPress={() => onSelectType(option.type)}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name={option.icon}
-              size={16}
-              color={isSelected ? colors.textOnColor : colors.textSecondary}
-            />
-            <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-              {option.label}
-            </Text>
+            {isSelected ? (
+              <LinearGradient
+                colors={gradients.violet}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.chip}
+              >
+                <Ionicons name={option.icon} size={16} color={colors.textOnColor} />
+                <Text style={[styles.chipText, styles.chipTextSelected]}>{option.label}</Text>
+              </LinearGradient>
+            ) : (
+              <View style={[styles.chip, styles.chipDefault]}>
+                <Ionicons name={option.icon} size={16} color={colors.textSecondary} />
+                <Text style={styles.chipText}>{option.label}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         );
       })}
@@ -71,16 +79,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.cardBackground,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     borderRadius: spacing.buttonRadiusSmall,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
-  chipSelected: {
-    backgroundColor: colors.accentPrimary,
-    borderColor: colors.accentPrimary,
+  chipDefault: {
+    backgroundColor: colors.backgroundTertiary,
   },
   chipText: {
     ...typography.captionMedium,

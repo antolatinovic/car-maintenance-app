@@ -8,7 +8,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
 import { getPrimaryVehicle } from '@/services/vehicleService';
 import { useExpenses } from './hooks';
-import { ExpensesHeader, ExpenseFilters, ExpenseList, ExpenseForm } from './components';
+import {
+  ExpensesHeader,
+  ExpenseFilters,
+  ExpenseList,
+  ExpenseForm,
+  BudgetSummaryCards,
+} from './components';
 import type { Expense, ExpenseType } from '@/core/types/database';
 import type { CreateExpenseData } from '@/services/expenseService';
 
@@ -133,6 +139,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onAnalyticsPress
     <View style={styles.container}>
       <ExpensesHeader
         monthlyTotal={getMonthlyTotal()}
+        expenseCount={expenses.length}
         onAddPress={handleAddPress}
         onAnalyticsPress={onAnalyticsPress}
       />
@@ -147,7 +154,13 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onAnalyticsPress
         onAddExpense={handleAddPress}
         onClearFilters={handleClearFilters}
         ListHeaderComponent={
-          <ExpenseFilters selectedType={selectedType} onSelectType={setSelectedType} />
+          <>
+            <BudgetSummaryCards
+              budgetSummary={budgetSummary}
+              onSeeAll={onAnalyticsPress}
+            />
+            <ExpenseFilters selectedType={selectedType} onSelectType={setSelectedType} />
+          </>
         }
       />
 

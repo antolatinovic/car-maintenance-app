@@ -6,7 +6,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
-import { BudgetCard, BudgetCategory } from './BudgetCard';
+import { BudgetCard } from '@/shared/components';
+import type { BudgetCategory } from '@/shared/components';
 
 interface BudgetData {
   category: BudgetCategory;
