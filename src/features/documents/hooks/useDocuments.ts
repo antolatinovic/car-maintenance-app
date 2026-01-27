@@ -26,7 +26,7 @@ interface UseDocumentsReturn extends DocumentsState {
     fileUri: string,
     fileName: string,
     data: Omit<CreateDocumentData, 'vehicle_id' | 'file_path'>
-  ) => Promise<Document | null>;
+  ) => Promise<{ document: Document | null; error: string | null }>;
   editDocument: (documentId: string, updates: UpdateDocumentData) => Promise<Document | null>;
   removeDocument: (documentId: string) => Promise<boolean>;
   filterByType: (type: DocumentType | null) => Document[];
@@ -86,8 +86,8 @@ export const useDocuments = (vehicleId: string | null): UseDocumentsReturn => {
       fileUri: string,
       fileName: string,
       data: Omit<CreateDocumentData, 'vehicle_id' | 'file_path'>
-    ): Promise<Document | null> => {
-      if (!vehicleId) return null;
+    ): Promise<{ document: Document | null; error: string | null }> => {
+      if (!vehicleId) return { document: null, error: 'Aucun vehicule selectionne' };
 
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
@@ -96,12 +96,13 @@ export const useDocuments = (vehicleId: string | null): UseDocumentsReturn => {
         const uploadResult = await uploadDocumentFile(vehicleId, fileUri, fileName);
 
         if (uploadResult.error || !uploadResult.data) {
+          const errorMsg = uploadResult.error?.message || 'Erreur lors du telechargement';
           setState(prev => ({
             ...prev,
             isLoading: false,
-            error: uploadResult.error?.message || 'Erreur lors du telechargement',
+            error: errorMsg,
           }));
-          return null;
+          return { document: null, error: errorMsg };
         }
 
         // Create document record
@@ -112,12 +113,13 @@ export const useDocuments = (vehicleId: string | null): UseDocumentsReturn => {
         });
 
         if (createResult.error || !createResult.data) {
+          const errorMsg = createResult.error?.message || 'Erreur lors de la creation';
           setState(prev => ({
             ...prev,
             isLoading: false,
-            error: createResult.error?.message || 'Erreur lors de la creation',
+            error: errorMsg,
           }));
-          return null;
+          return { document: null, error: errorMsg };
         }
 
         // Add to local state
@@ -128,14 +130,15 @@ export const useDocuments = (vehicleId: string | null): UseDocumentsReturn => {
           error: null,
         }));
 
-        return createResult.data;
+        return { document: createResult.data, error: null };
       } catch (error) {
+        const errorMsg = "Erreur lors de l'ajout du document";
         setState(prev => ({
           ...prev,
           isLoading: false,
-          error: "Erreur lors de l'ajout du document",
+          error: errorMsg,
         }));
-        return null;
+        return { document: null, error: errorMsg };
       }
     },
     [vehicleId]

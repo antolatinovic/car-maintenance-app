@@ -3,6 +3,7 @@
  */
 
 import { supabase } from '@/core/config/supabase';
+import { clearSignedUrlCache } from '@/core/utils/storageUtils';
 import type { UserSettings, Profile } from '@/core/types/database';
 
 interface ServiceError {
@@ -180,14 +181,13 @@ export const uploadAvatar = async (
       return { data: null, error: { message: uploadError.message } };
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    // Store the relative path (not public URL) for signed URL resolution
+    await updateProfile({ avatar_url: filePath });
 
-    // Update profile with new avatar URL
-    const avatarUrl = urlData.publicUrl;
-    await updateProfile({ avatar_url: avatarUrl });
+    // Clear signed URL cache so new URL is generated
+    clearSignedUrlCache('avatars');
 
-    return { data: avatarUrl, error: null };
+    return { data: filePath, error: null };
   } catch (error) {
     return { data: null, error: { message: "Erreur lors de l'upload de l'avatar" } };
   }

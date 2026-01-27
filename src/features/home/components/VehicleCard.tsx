@@ -6,6 +6,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
+import { SecureImage } from '@/shared/components';
 import type { Vehicle } from '@/core/types/database';
 
 // Image 3D par défaut quand pas de photo
@@ -28,11 +29,20 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, onPress }) =>
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.9}>
       {/* Hero Image */}
-      <Image
-        source={hasCustomPhoto ? { uri: vehicle.photo_url } : defaultCarImage}
-        style={styles.heroImage}
-        resizeMode="contain"
-      />
+      {hasCustomPhoto ? (
+        <SecureImage
+          bucket="vehicles"
+          path={vehicle.photo_url}
+          style={styles.heroImage}
+          resizeMode="contain"
+        />
+      ) : (
+        <Image
+          source={defaultCarImage}
+          style={styles.heroImage}
+          resizeMode="contain"
+        />
+      )}
 
       {/* Info row: Name + Edit icon */}
       <View style={styles.infoContainer}>

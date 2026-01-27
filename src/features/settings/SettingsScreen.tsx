@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/core/theme';
 import { useAuthContext, useAppContext, useOfflineContext } from '@/core/contexts';
-import { useSettings, useProfileEdit, useVehicleManagement, useCarSkin } from './hooks';
+import { useSettings, useProfileEdit, useVehicleManagement, useCarSkin, useAccountDeletion, useDataExport } from './hooks';
 import {
   SettingsHeader,
   SettingsSection,
@@ -20,6 +20,7 @@ import {
   AboutModal,
   LogoutConfirmModal,
   CarSkinSelector,
+  DeleteAccountModal,
 } from './components';
 import { CAR_SKINS } from '@/core/types';
 import type { CarSkinId } from '@/core/types';
@@ -40,6 +41,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
   const { vehicles, isLoading: isLoadingVehicles, primaryVehicleId, setAsPrimary } =
     useVehicleManagement();
   const { currentSkin, setSkin, displayMode, setDisplayMode } = useCarSkin();
+  const { isDeleting, error: deleteError, deleteAccount, clearError: clearDeleteError } = useAccountDeletion();
+  const { isExporting, exportAndShare } = useDataExport();
   const { debugForceOffline, setDebugForceOffline, isOnline, pendingOperationsCount } = useOfflineContext();
 
   // Modal states
@@ -50,6 +53,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showCarSkinSelector, setShowCarSkinSelector] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   // Handlers
   const handleAvatarPress = useCallback(async () => {
@@ -137,6 +141,22 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
     },
     [setDisplayMode]
   );
+
+  const handleDeleteAccount = useCallback(
+    async (password: string) => {
+      await deleteAccount(password);
+    },
+    [deleteAccount]
+  );
+
+  const handleDeleteAccountCancel = useCallback(() => {
+    setShowDeleteAccount(false);
+    clearDeleteError();
+  }, [clearDeleteError]);
+
+  const handleExportData = useCallback(async () => {
+    await exportAndShare();
+  }, [exportAndShare]);
 
   // Get primary vehicle info for display
   const primaryVehicle = vehicles.find(v => v.id === primaryVehicleId);
@@ -245,6 +265,23 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
           />
         </SettingsSection>
 
+        {/* GDPR Section */}
+        <SettingsSection title="Donnees personnelles">
+          <SettingsItem
+            icon="download-outline"
+            label="Exporter mes donnees"
+            onPress={handleExportData}
+            value={isExporting ? 'Export...' : undefined}
+          />
+          <SettingsItem
+            icon="trash-outline"
+            label="Supprimer mon compte"
+            onPress={() => setShowDeleteAccount(true)}
+            showChevron={false}
+            danger
+          />
+        </SettingsSection>
+
         {/* Logout Section */}
         <SettingsSection>
           <SettingsItem
@@ -300,6 +337,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
         displayMode={displayMode}
         onDisplayModeChange={handleDisplayModeChange}
         vehiclePhotoUrl={primaryVehiclePhotoUrl}
+      />
+
+      <DeleteAccountModal
+        visible={showDeleteAccount}
+        onConfirm={handleDeleteAccount}
+        onCancel={handleDeleteAccountCancel}
+        isLoading={isDeleting}
+        error={deleteError}
       />
     </View>
   );

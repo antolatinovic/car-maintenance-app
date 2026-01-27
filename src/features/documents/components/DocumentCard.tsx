@@ -4,11 +4,10 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
-import { GlassCard } from '@/shared/components';
-import { getDocumentUrl } from '@/services/documentService';
+import { GlassCard, SecureImage } from '@/shared/components';
 import type { Document, DocumentType } from '@/core/types/database';
 
 interface DocumentCardProps {
@@ -69,7 +68,6 @@ const typeConfig: Record<
 
 export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onPress, onLongPress }) => {
   const config = typeConfig[document.type];
-  const imageUrl = getDocumentUrl(document.file_path);
 
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return 'Date non definie';
@@ -99,7 +97,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({ document, onPress, o
       <GlassCard variant="light" style={styles.container}>
         <View style={styles.cardContent}>
           <View style={styles.thumbnailContainer}>
-            <Image source={{ uri: imageUrl }} style={styles.thumbnail} resizeMode="cover" />
+            <SecureImage bucket="documents" path={document.file_path} style={styles.thumbnail} resizeMode="cover" />
             <View style={[styles.typeOverlay, { backgroundColor: config.color }]}>
               <Ionicons name={config.icon} size={14} color={colors.textOnColor} />
             </View>

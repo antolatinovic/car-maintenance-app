@@ -3,8 +3,9 @@
  */
 
 import React from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { colors, spacing, typography } from '@/core/theme';
+import { SecureImage } from './SecureImage';
 
 interface AvatarProps {
   uri?: string | null;
@@ -37,8 +38,9 @@ export const Avatar: React.FC<AvatarProps> = ({ uri, name, size = 'medium' }) =>
       ]}
     >
       {uri ? (
-        <Image
-          source={{ uri }}
+        <SecureImage
+          bucket="avatars"
+          path={uri}
           style={[
             styles.image,
             { width: dimension, height: dimension, borderRadius: dimension / 2 },

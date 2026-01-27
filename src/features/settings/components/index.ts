@@ -13,3 +13,4 @@ export { UnitSelector } from './UnitSelector';
 export { AboutModal } from './AboutModal';
 export { LogoutConfirmModal } from './LogoutConfirmModal';
 export { CarSkinSelector } from './CarSkinSelector';
+export { DeleteAccountModal } from './DeleteAccountModal';

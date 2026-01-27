@@ -169,11 +169,13 @@ export const DocumentsScreen: React.FC = () => {
 
       const result = await addDocument(scannedImage.uri, scannedImage.fileName, data);
 
-      if (result) {
+      if (result.document) {
         setScannedImage(null);
         setPreselectedType(undefined);
         setMode('list');
         scanner.clearScannedImage();
+      } else {
+        Alert.alert('Erreur', result.error || "Impossible d'enregistrer le document.");
       }
     },
     [scannedImage, addDocument, scanner]
@@ -339,6 +341,8 @@ export const DocumentsScreen: React.FC = () => {
     <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

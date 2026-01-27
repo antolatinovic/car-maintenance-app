@@ -3,6 +3,7 @@
  */
 
 import { supabase } from '@/core/config/supabase';
+import { clearSignedUrlCache } from '@/core/utils/storageUtils';
 
 interface ServiceError {
   message: string;
@@ -70,17 +71,10 @@ export const uploadVehiclePhoto = async (
       return { data: null, error: { message: uploadError.message } };
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(filePath);
-
-    const publicUrl = urlData.publicUrl;
-
-    // Update vehicle record with photo URL
+    // Store the relative path (not public URL) for signed URL resolution
     const { error: updateError } = await supabase
       .from('vehicles')
-      .update({ photo_url: publicUrl } as never)
+      .update({ photo_url: filePath } as never)
       .eq('id', vehicleId)
       .eq('user_id', user.id);
 
@@ -90,7 +84,10 @@ export const uploadVehiclePhoto = async (
       return { data: null, error: { message: updateError.message } };
     }
 
-    return { data: publicUrl, error: null };
+    // Clear signed URL cache so new URL is generated
+    clearSignedUrlCache('vehicles');
+
+    return { data: filePath, error: null };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Erreur lors de l\'upload de la photo';
     return { data: null, error: { message } };

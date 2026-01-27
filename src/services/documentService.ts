@@ -2,7 +2,9 @@
  * Document Service - CRUD operations for documents
  */
 
+import { File as ExpoFile } from 'expo-file-system';
 import { supabase } from '@/core/config/supabase';
+import { getSignedStorageUrl } from '@/core/utils/storageUtils';
 import type { Document, DocumentType, MaintenanceCategory } from '@/core/types/database';
 
 export interface CreateDocumentData {
@@ -255,15 +257,22 @@ export const uploadDocumentFile = async (
     const timestamp = Date.now();
     const filePath = `${user.id}/${vehicleId}/${timestamp}_${fileName}`;
 
-    // Fetch the file and convert to blob
-    const response = await fetch(fileUri);
-    const blob = await response.blob();
+    // Read file as ArrayBuffer using expo-file-system (reliable in React Native)
+    const file = new ExpoFile(fileUri);
+    const arrayBuffer = await file.arrayBuffer();
+
+    // Detect content type from file extension
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    const contentType =
+      ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
 
     // Upload to storage
-    const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, blob, {
-      contentType: blob.type || 'image/jpeg',
-      upsert: false,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, arrayBuffer, {
+        contentType,
+        upsert: false,
+      });
 
     if (uploadError) {
       return { data: null, error: { message: uploadError.message } };
@@ -276,11 +285,10 @@ export const uploadDocumentFile = async (
 };
 
 /**
- * Get public URL for a document file
+ * Get signed URL for a document file (private bucket)
  */
-export const getDocumentUrl = (filePath: string): string => {
-  const { data } = supabase.storage.from('documents').getPublicUrl(filePath);
-  return data.publicUrl;
+export const getDocumentUrl = async (filePath: string): Promise<string | null> => {
+  return getSignedStorageUrl('documents', filePath);
 };
 
 /**

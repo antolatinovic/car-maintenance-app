@@ -19,6 +19,7 @@ import { Image } from 'expo-image';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSignedUrl } from '@/core/utils/storageUtils';
 import type { CarSkinId, CarDisplayMode } from '@/core/types';
 import {
   DEFAULT_CAR_SKIN,
@@ -129,8 +130,11 @@ export const CarDisplay: React.FC<CarDisplayProps> = ({
     outputRange: [0, -10],
   });
 
+  // Resolve signed URL for vehicle photo
+  const { url: signedPhotoUrl } = useSignedUrl('vehicles', vehiclePhotoUrl);
+
   // Determine what to show
-  const showPhoto = displayMode === 'photo' && vehiclePhotoUrl;
+  const showPhoto = displayMode === 'photo' && vehiclePhotoUrl && signedPhotoUrl;
   const hasPhoto = !!vehiclePhotoUrl;
 
   // Glass button component
@@ -182,7 +186,7 @@ export const CarDisplay: React.FC<CarDisplayProps> = ({
       <Animated.View style={[styles.imageWrapper, { transform: [{ translateY }] }]}>
         {showPhoto ? (
           <Image
-            source={{ uri: vehiclePhotoUrl }}
+            source={{ uri: signedPhotoUrl }}
             style={styles.vehiclePhoto}
             contentFit="cover"
             cachePolicy="memory-disk"

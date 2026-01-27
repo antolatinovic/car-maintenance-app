@@ -3,9 +3,10 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
+import { SecureImage } from '@/shared/components';
 import type { Profile } from '@/core/types/database';
 
 interface SettingsHeaderProps {
@@ -44,7 +45,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
         disabled={isUploadingAvatar}
       >
         {profile?.avatar_url ? (
-          <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
+          <SecureImage bucket="avatars" path={profile.avatar_url} style={styles.avatar} />
         ) : (
           <View style={styles.avatarPlaceholder}>
             <Text style={styles.initials}>{initials}</Text>

@@ -120,6 +120,7 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
         style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Preview image */}
         <View style={styles.previewContainer}>

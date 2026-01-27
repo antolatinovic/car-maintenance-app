@@ -8,14 +8,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   ScrollView,
   Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography, shadows } from '@/core/theme';
-import { getDocumentUrl } from '@/services/documentService';
+import { SecureImage } from '@/shared/components';
 import type { Document, DocumentType } from '@/core/types/database';
 
 interface DocumentViewerProps {
@@ -39,7 +38,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onClose, onDelete }) => {
   const insets = useSafeAreaInsets();
-  const imageUrl = getDocumentUrl(document.file_path);
 
   const formatDate = (dateStr: string | null): string => {
     if (!dateStr) return 'Non definie';
@@ -81,7 +79,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({ document, onClos
       >
         {/* Image */}
         <View style={styles.imageContainer}>
-          <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="contain" />
+          <SecureImage bucket="documents" path={document.file_path} style={styles.image} resizeMode="contain" />
         </View>
 
         {/* Details */}

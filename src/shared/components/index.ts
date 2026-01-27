@@ -10,3 +10,4 @@ export type { TabItem } from './TabBar';
 export { PlaceholderScreen } from './PlaceholderScreen';
 export { FeatureErrorBoundary } from './FeatureErrorBoundary';
 export { OfflineBanner } from './OfflineBanner';
+export { SecureImage } from './SecureImage';
