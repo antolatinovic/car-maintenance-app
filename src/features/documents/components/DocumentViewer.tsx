@@ -31,6 +31,7 @@ const typeLabels: Record<DocumentType, string> = {
   inspection: 'Controle technique',
   invoice: 'Facture',
   fuel_receipt: 'Carburant',
+  maintenance: 'Entretien',
   other: 'Autre',
 };
 

@@ -72,7 +72,7 @@ export const useAuth = (): UseAuthReturn => {
     try {
       // Create a promise that rejects after timeout
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('timeout')), 5000);
+        setTimeout(() => reject(new Error('timeout')), 10000);
       });
 
       // Race between fetch and timeout
@@ -81,7 +81,7 @@ export const useAuth = (): UseAuthReturn => {
       const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.warn('Error fetching profile, using cache:', error.message);
         // Try to get cached profile
         return await getCachedProfile();
       }
@@ -93,7 +93,7 @@ export const useAuth = (): UseAuthReturn => {
 
       return data;
     } catch (error) {
-      console.error('Error fetching profile (possibly offline):', error);
+      console.warn('Profile fetch failed (possibly offline), using cache');
       // Return cached profile when offline
       return await getCachedProfile();
     }
@@ -105,7 +105,7 @@ export const useAuth = (): UseAuthReturn => {
       try {
         // Get session with timeout for offline scenarios
         const timeoutPromise = new Promise<{ data: { session: Session | null } }>((resolve) => {
-          setTimeout(() => resolve({ data: { session: null } }), 5000);
+          setTimeout(() => resolve({ data: { session: null } }), 15000);
         });
 
         const sessionPromise = supabase.auth.getSession();

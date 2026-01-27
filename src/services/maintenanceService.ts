@@ -165,6 +165,10 @@ export const getUpcomingMaintenances = async (
         mechanical: 'Mecanique',
         revision: 'Revision',
         ac: 'Climatisation',
+        distribution: 'Distribution',
+        suspension: 'Amortisseur',
+        fluids: 'Liquides',
+        gearbox_oil: 'Vidange boite auto',
         custom: 'Autre',
       };
 

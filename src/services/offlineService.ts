@@ -98,14 +98,24 @@ export const vehicles = {
         };
       }
 
-      // There was an error - try cache
+      // There was an error (auth not ready, network issue, etc.) - try cache
       const cached = await getOfflineCached<Vehicle[]>(OFFLINE_CACHE_KEYS.VEHICLES);
       const primary = cached.data?.find((v) => v.is_primary) || cached.data?.[0] || null;
+
+      // If we have cached data, return it even on auth errors
+      if (primary) {
+        return {
+          data: primary,
+          error: null,
+          fromCache: true,
+          isStale: cached.isStale,
+        };
+      }
+
       return {
-        data: primary,
-        error: primary ? null : result.error,
-        fromCache: true,
-        isStale: cached.isStale,
+        data: null,
+        error: result.error,
+        fromCache: false,
       };
     } catch (error) {
       // Network or other error - try cache
@@ -379,6 +389,10 @@ export const maintenance = {
       mechanical: 'Mecanique',
       revision: 'Revision',
       ac: 'Climatisation',
+      distribution: 'Distribution',
+      suspension: 'Amortisseur',
+      fluids: 'Liquides',
+      gearbox_oil: 'Vidange boite auto',
       custom: 'Autre',
     };
 

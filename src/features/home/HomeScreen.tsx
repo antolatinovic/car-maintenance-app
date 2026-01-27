@@ -21,8 +21,9 @@ import type { Profile } from '@/core/types/database';
 import type { TabItem } from '@/shared/components/TabBar';
 import { HomeHeader } from './components/HomeHeader';
 import { UpcomingMaintenance } from './components/UpcomingMaintenance';
+import { MaintenanceStatusCards } from './components/MaintenanceStatusCards';
 import { CarDisplay } from './components/CarDisplay';
-import { useHomeData, useVehiclePhoto } from './hooks';
+import { useHomeData, useVehiclePhoto, useMaintenanceStatus } from './hooks';
 
 interface HomeScreenProps {
   userProfile?: Profile | null;
@@ -42,6 +43,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const insets = useSafeAreaInsets();
   const { vehicle, maintenances, isLoading, refresh } = useHomeData();
   const { isUploading, displayMode, pickAndUploadPhoto, toggleDisplayMode } = useVehiclePhoto();
+  const statusCards = useMaintenanceStatus(vehicle?.id, vehicle?.current_mileage ?? undefined);
 
   const userName = userProfile
     ? `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || 'Utilisateur'
@@ -180,6 +182,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             onToggleMode={handleToggleDisplayMode}
           />
         </View>
+
+        {/* Maintenance Status Cards */}
+        {statusCards.length > 0 && (
+          <View style={styles.section}>
+            <MaintenanceStatusCards cards={statusCards} />
+          </View>
+        )}
 
         {/* Upcoming Maintenance - 2 items */}
         <View style={styles.section}>

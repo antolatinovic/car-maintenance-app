@@ -22,6 +22,10 @@ const CATEGORY_LABELS: Record<MaintenanceCategory, string> = {
   mechanical: 'Mecanique',
   revision: 'Revision',
   ac: 'Climatisation',
+  distribution: 'Distribution',
+  suspension: 'Amortisseur',
+  fluids: 'Liquides',
+  gearbox_oil: 'Vidange boite auto',
   custom: 'Entretien',
 };
 

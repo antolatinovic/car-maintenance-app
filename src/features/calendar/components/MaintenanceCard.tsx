@@ -37,6 +37,10 @@ const categoryIcons: Record<MaintenanceCategory, keyof typeof Ionicons.glyphMap>
   mechanical: 'cog',
   revision: 'checkmark-circle',
   ac: 'snow',
+  distribution: 'git-network',
+  suspension: 'swap-vertical',
+  fluids: 'beaker',
+  gearbox_oil: 'settings',
   custom: 'build',
 };
 
@@ -48,6 +52,10 @@ const categoryLabels: Record<MaintenanceCategory, string> = {
   mechanical: 'Mecanique',
   revision: 'Revision',
   ac: 'Climatisation',
+  distribution: 'Distribution',
+  suspension: 'Amortisseur',
+  fluids: 'Liquides',
+  gearbox_oil: 'Vidange boite auto',
   custom: 'Autre',
 };
 

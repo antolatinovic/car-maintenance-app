@@ -30,6 +30,10 @@ const categories: CategoryOption[] = [
   { key: 'mechanical', label: 'Mecanique', icon: 'cog' },
   { key: 'revision', label: 'Revision', icon: 'checkmark-circle' },
   { key: 'ac', label: 'Clim', icon: 'snow' },
+  { key: 'distribution', label: 'Distribution', icon: 'git-network' },
+  { key: 'suspension', label: 'Amortisseur', icon: 'swap-vertical' },
+  { key: 'fluids', label: 'Liquides', icon: 'beaker' },
+  { key: 'gearbox_oil', label: 'Boite auto', icon: 'settings' },
   { key: 'custom', label: 'Autre', icon: 'build' },
 ];
 

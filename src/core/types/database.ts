@@ -13,6 +13,10 @@ export type MaintenanceCategory =
   | 'mechanical'
   | 'revision'
   | 'ac'
+  | 'distribution'
+  | 'suspension'
+  | 'fluids'
+  | 'gearbox_oil'
   | 'custom';
 export type ReminderType = 'date' | 'mileage' | 'both';
 export type RecurrenceType = 'none' | 'monthly' | 'yearly' | 'km_based';
@@ -24,6 +28,7 @@ export type DocumentType =
   | 'inspection'
   | 'invoice'
   | 'fuel_receipt'
+  | 'maintenance'
   | 'other';
 export type ExpenseType =
   | 'fuel'

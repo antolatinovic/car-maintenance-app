@@ -316,6 +316,7 @@ export const getDocumentsGroupedByType = async (
       inspection: [],
       invoice: [],
       fuel_receipt: [],
+      maintenance: [],
       other: [],
     };
 

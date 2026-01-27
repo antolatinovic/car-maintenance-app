@@ -44,6 +44,10 @@ const categoryIcons: Record<MaintenanceCategory, keyof typeof Ionicons.glyphMap>
   mechanical: 'cog',
   revision: 'checkmark-circle',
   ac: 'snow',
+  distribution: 'git-network',
+  suspension: 'swap-vertical',
+  fluids: 'beaker',
+  gearbox_oil: 'settings',
   custom: 'build',
 };
 

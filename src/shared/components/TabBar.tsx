@@ -3,12 +3,14 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text, Platform } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, Platform, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { colors, gradients, shadows, spacing, typography } from '@/core/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const documentsIcon = require('../../../assets/documents-icon.png');
 
 export type TabItem = 'home' | 'documents' | 'expenses' | 'calendar' | 'assistant';
 
@@ -57,11 +59,19 @@ const TabButton: React.FC<{
 }> = ({ tab, isActive, onPress }) => (
   <TouchableOpacity style={styles.tab} onPress={onPress} activeOpacity={0.7}>
     <View style={[styles.iconContainer, isActive && styles.iconContainerActive]}>
-      <Ionicons
-        name={isActive ? tab.iconActive : tab.icon}
-        size={22}
-        color={isActive ? colors.accentPrimary : colors.textTertiary}
-      />
+      {tab.key === 'documents' ? (
+        <Image
+          source={documentsIcon}
+          style={[styles.customIcon, !isActive && styles.customIconInactive]}
+          resizeMode="contain"
+        />
+      ) : (
+        <Ionicons
+          name={isActive ? tab.iconActive : tab.icon}
+          size={22}
+          color={isActive ? colors.accentPrimary : colors.textTertiary}
+        />
+      )}
     </View>
     <Text style={[styles.label, isActive && styles.labelActive]}>{tab.label}</Text>
   </TouchableOpacity>
@@ -190,6 +200,13 @@ const styles = StyleSheet.create({
   },
   iconContainerActive: {
     backgroundColor: `${colors.accentPrimary}15`,
+  },
+  customIcon: {
+    width: 26,
+    height: 26,
+  },
+  customIconInactive: {
+    opacity: 0.5,
   },
   label: {
     ...typography.tabLabel,

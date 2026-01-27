@@ -24,6 +24,7 @@ const filterOptions: FilterOption[] = [
   { type: 'registration', label: 'Carte grise', icon: 'car-outline' },
   { type: 'license', label: 'Permis', icon: 'id-card-outline' },
   { type: 'inspection', label: 'CT', icon: 'clipboard-outline' },
+  { type: 'maintenance', label: 'Entretien', icon: 'construct-outline' },
   { type: 'other', label: 'Autres', icon: 'folder-outline' },
 ];
 

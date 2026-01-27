@@ -18,8 +18,10 @@ interface QuickAccessConfig {
 }
 
 const quickAccessTypes: QuickAccessConfig[] = [
-  { type: 'registration', label: 'Carte grise', icon: 'car', color: colors.accentSuccess },
+  { type: 'invoice', label: 'Factures', icon: 'receipt', color: colors.accentPrimary },
+  { type: 'maintenance', label: 'Entretien', icon: 'construct', color: colors.accentSecondary },
   { type: 'inspection', label: 'Controle tech.', icon: 'clipboard', color: colors.accentWarning },
+  { type: 'registration', label: 'Carte grise', icon: 'car', color: colors.accentSuccess },
 ];
 
 interface QuickAccessCardsProps {

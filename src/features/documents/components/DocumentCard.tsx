@@ -55,6 +55,11 @@ const typeConfig: Record<
     icon: 'water-outline',
     color: colors.accentSecondary,
   },
+  maintenance: {
+    label: 'Entretien',
+    icon: 'construct-outline',
+    color: colors.accentSecondary,
+  },
   other: {
     label: 'Autre',
     icon: 'folder-outline',

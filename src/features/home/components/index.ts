@@ -8,4 +8,5 @@ export { BudgetCard } from './BudgetCard';
 export type { BudgetCategory } from './BudgetCard';
 export { BudgetGrid } from './BudgetGrid';
 export { UpcomingMaintenance } from './UpcomingMaintenance';
+export { MaintenanceStatusCards } from './MaintenanceStatusCards';
 export { CarDisplay } from './CarDisplay';

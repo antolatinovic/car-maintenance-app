@@ -14,11 +14,14 @@ import {
   TextInput,
   TouchableOpacity,
   Platform,
+  Image,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
+
+const documentsIcon = require('../../../assets/documents-icon.png');
 import { getPrimaryVehicle } from '@/services/vehicleService';
 import { useDocuments, useDocumentScanner } from './hooks';
 import {
@@ -42,8 +45,33 @@ const sectionTypes: DocumentType[] = [
   'registration',
   'license',
   'inspection',
+  'maintenance',
   'other',
 ];
+
+const typeLabels: Record<DocumentType, string> = {
+  insurance: 'assurance',
+  registration: 'carte grise',
+  license: 'permis',
+  inspection: 'controle technique',
+  invoice: 'facture',
+  fuel_receipt: 'carburant',
+  maintenance: 'entretien',
+  other: 'autre',
+};
+
+const formatDateForSearch = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  const day = date.getDate().toString().padStart(2, '0');
+  const monthIndex = date.getMonth();
+  const year = date.getFullYear().toString();
+  const monthNames = [
+    'janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre',
+  ];
+  const monthNum = (monthIndex + 1).toString().padStart(2, '0');
+  return `${day}/${monthNum}/${year} ${day} ${monthNames[monthIndex]} ${year}`;
+};
 
 export const DocumentsScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
@@ -81,6 +109,7 @@ export const DocumentsScreen: React.FC = () => {
       inspection: [],
       invoice: [],
       fuel_receipt: [],
+      maintenance: [],
       other: [],
     };
 
@@ -92,7 +121,10 @@ export const DocumentsScreen: React.FC = () => {
         const matchesSearch =
           doc.description?.toLowerCase().includes(query) ||
           doc.vendor?.toLowerCase().includes(query) ||
-          doc.notes?.toLowerCase().includes(query);
+          doc.notes?.toLowerCase().includes(query) ||
+          typeLabels[doc.type]?.includes(query) ||
+          doc.amount?.toString().includes(query) ||
+          (doc.date && formatDateForSearch(doc.date).includes(query));
         if (!matchesSearch) return;
       }
 
@@ -390,6 +422,13 @@ export const DocumentsScreen: React.FC = () => {
               <Ionicons name="add" size={20} color={colors.textOnColor} />
               <Text style={styles.addFirstText}>Ajouter un document</Text>
             </TouchableOpacity>
+            <View style={styles.emptyIconContainer}>
+              <Image
+                source={documentsIcon}
+                style={styles.emptyIcon}
+                resizeMode="contain"
+              />
+            </View>
           </View>
         )}
 
@@ -537,6 +576,19 @@ const styles = StyleSheet.create({
   addFirstText: {
     ...typography.bodySemiBold,
     color: colors.textOnColor,
+  },
+  emptyIconContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: `${colors.accentPrimary}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xl,
+  },
+  emptyIcon: {
+    width: 52,
+    height: 52,
   },
   emptySearchContainer: {
     alignItems: 'center',

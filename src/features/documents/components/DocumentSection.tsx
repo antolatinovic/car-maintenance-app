@@ -60,6 +60,11 @@ const sectionConfig: Record<DocumentType, SectionConfig> = {
     icon: 'clipboard-outline',
     color: colors.accentWarning,
   },
+  maintenance: {
+    label: 'Entretien',
+    icon: 'construct-outline',
+    color: colors.accentSecondary,
+  },
   other: {
     label: 'Autres',
     icon: 'folder-outline',
