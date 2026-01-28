@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, typography } from '@/core/theme';
 import { useAuthContext, useAppContext, useOfflineContext } from '@/core/contexts';
-import { useSettings, useProfileEdit, useVehicleManagement, useCarSkin, useAccountDeletion, useDataExport } from './hooks';
+import { useSettings, useProfileEdit, useVehicleManagement, useAccountDeletion, useDataExport } from './hooks';
 import {
   SettingsHeader,
   SettingsSection,
@@ -19,11 +19,8 @@ import {
   UnitSelector,
   AboutModal,
   LogoutConfirmModal,
-  CarSkinSelector,
   DeleteAccountModal,
 } from './components';
-import { CAR_SKINS } from '@/core/types';
-import type { CarSkinId } from '@/core/types';
 
 interface SettingsScreenProps {
   onClose?: () => void;
@@ -40,7 +37,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
     useProfileEdit(refreshProfile);
   const { vehicles, isLoading: isLoadingVehicles, primaryVehicleId, setAsPrimary } =
     useVehicleManagement();
-  const { currentSkin, setSkin, displayMode, setDisplayMode } = useCarSkin();
   const { isDeleting, error: deleteError, deleteAccount, clearError: clearDeleteError } = useAccountDeletion();
   const { isExporting, exportAndShare } = useDataExport();
   const { debugForceOffline, setDebugForceOffline, isOnline, pendingOperationsCount } = useOfflineContext();
@@ -52,7 +48,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
   const [showAbout, setShowAbout] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [showCarSkinSelector, setShowCarSkinSelector] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   // Handlers
@@ -118,29 +113,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
     }, 100);
   }, [openVehicleForm, onClose]);
 
-  const handleCarSkinSelect = useCallback(
-    async (skinId: CarSkinId) => {
-      const success = await setSkin(skinId);
-      if (!success) {
-        Alert.alert('Erreur', 'Impossible de changer le style de voiture');
-      }
-    },
-    [setSkin]
-  );
-
   const handleDebugOfflineToggle = useCallback(() => {
     setDebugForceOffline(!debugForceOffline);
   }, [debugForceOffline, setDebugForceOffline]);
-
-  const handleDisplayModeChange = useCallback(
-    async (mode: 'photo' | 'skin') => {
-      const success = await setDisplayMode(mode);
-      if (!success) {
-        Alert.alert('Erreur', 'Impossible de changer le mode d\'affichage');
-      }
-    },
-    [setDisplayMode]
-  );
 
   const handleDeleteAccount = useCallback(
     async (password: string) => {
@@ -163,14 +138,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
   const primaryVehicleName = primaryVehicle
     ? `${primaryVehicle.brand} ${primaryVehicle.model}`
     : 'Aucun';
-  const primaryVehiclePhotoUrl = primaryVehicle?.photo_url || null;
 
   // Get unit display text
   const unitDisplayText = settings?.mileage_unit === 'miles' ? 'Miles' : 'Kilometres';
-
-  // Get car skin display text
-  const currentSkinData = CAR_SKINS.find(s => s.id === currentSkin);
-  const carSkinDisplayText = currentSkinData?.name ?? 'Classique';
 
   return (
     <View style={styles.container}>
@@ -221,12 +191,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
             label="Unite de distance"
             value={unitDisplayText}
             onPress={() => setShowUnitSelector(true)}
-          />
-          <SettingsItem
-            icon="color-palette-outline"
-            label="Style de voiture"
-            value={carSkinDisplayText}
-            onPress={() => setShowCarSkinSelector(true)}
           />
         </SettingsSection>
 
@@ -327,16 +291,6 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onClose }) => {
         onConfirm={handleLogout}
         onCancel={() => setShowLogoutConfirm(false)}
         isLoading={isLoggingOut}
-      />
-
-      <CarSkinSelector
-        visible={showCarSkinSelector}
-        currentSkin={currentSkin}
-        onSelect={handleCarSkinSelect}
-        onClose={() => setShowCarSkinSelector(false)}
-        displayMode={displayMode}
-        onDisplayModeChange={handleDisplayModeChange}
-        vehiclePhotoUrl={primaryVehiclePhotoUrl}
       />
 
       <DeleteAccountModal

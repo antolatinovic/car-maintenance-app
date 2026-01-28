@@ -1,15 +1,13 @@
 /**
- * CarDisplay - Shows the selected car skin or user's photo on home screen with floating animation
+ * CarDisplay - Shows the Carly mascot or user's vehicle photo on home screen with floating animation
  */
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
   Animated,
   Easing,
-  AppState,
-  AppStateStatus,
   TouchableOpacity,
   Text,
   Platform,
@@ -18,21 +16,10 @@ import {
 import { Image } from 'expo-image';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSignedUrl } from '@/core/utils/storageUtils';
-import type { CarSkinId, CarDisplayMode } from '@/core/types';
-import {
-  DEFAULT_CAR_SKIN,
-  CAR_SKIN_STORAGE_KEY,
-  CAR_DISPLAY_MODE_KEY,
-  DEFAULT_CAR_DISPLAY_MODE,
-} from '@/core/types';
 import { colors, spacing, typography } from '@/core/theme';
 
-const CAR_IMAGES: Record<CarSkinId, ReturnType<typeof require>> = {
-  classic: require('../../../../assets/cars/car-classic.png'),
-  sport: require('../../../../assets/cars/car-sport.png'),
-};
+const MASCOT_IMAGE = require('../../../../assets/Carly_Mascotte.png');
 
 interface CarDisplayProps {
   height?: number;
@@ -40,8 +27,6 @@ interface CarDisplayProps {
   vehicleId?: string;
   onAddPhotoPress?: () => void;
   isUploading?: boolean;
-  displayMode?: CarDisplayMode;
-  onToggleMode?: () => void;
 }
 
 export const CarDisplay: React.FC<CarDisplayProps> = ({
@@ -50,57 +35,8 @@ export const CarDisplay: React.FC<CarDisplayProps> = ({
   vehicleId,
   onAddPhotoPress,
   isUploading = false,
-  displayMode: propDisplayMode,
-  onToggleMode,
 }) => {
-  const [currentSkin, setCurrentSkin] = useState<CarSkinId>(DEFAULT_CAR_SKIN);
-  const [localDisplayMode, setLocalDisplayMode] = useState<CarDisplayMode>(DEFAULT_CAR_DISPLAY_MODE);
   const floatAnim = useRef(new Animated.Value(0)).current;
-  const appState = useRef(AppState.currentState);
-
-  // Use prop display mode if provided, otherwise use local state
-  const displayMode = propDisplayMode ?? localDisplayMode;
-
-  const loadPreferences = useCallback(async () => {
-    try {
-      const [savedSkin, savedMode] = await Promise.all([
-        AsyncStorage.getItem(CAR_SKIN_STORAGE_KEY),
-        AsyncStorage.getItem(CAR_DISPLAY_MODE_KEY),
-      ]);
-      if (savedSkin && (savedSkin === 'classic' || savedSkin === 'sport')) {
-        setCurrentSkin(savedSkin);
-      }
-      if (savedMode && (savedMode === 'photo' || savedMode === 'skin')) {
-        setLocalDisplayMode(savedMode);
-      }
-    } catch (error) {
-      console.error('Error loading car preferences:', error);
-    }
-  }, []);
-
-  // Load preferences on mount
-  useEffect(() => {
-    loadPreferences();
-  }, [loadPreferences]);
-
-  // Reload preferences when app becomes active
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        loadPreferences();
-      }
-      appState.current = nextAppState;
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    return () => subscription.remove();
-  }, [loadPreferences]);
-
-  // Periodic check for preference changes
-  useEffect(() => {
-    const interval = setInterval(loadPreferences, 2000);
-    return () => clearInterval(interval);
-  }, [loadPreferences]);
 
   // Floating animation
   useEffect(() => {
@@ -132,10 +68,7 @@ export const CarDisplay: React.FC<CarDisplayProps> = ({
 
   // Resolve signed URL for vehicle photo
   const { url: signedPhotoUrl } = useSignedUrl('vehicles', vehiclePhotoUrl);
-
-  // Determine what to show
-  const showPhoto = displayMode === 'photo' && vehiclePhotoUrl && signedPhotoUrl;
-  const hasPhoto = !!vehiclePhotoUrl;
+  const showPhoto = vehiclePhotoUrl && signedPhotoUrl;
 
   // Glass button component
   const GlassButton: React.FC<{
@@ -194,7 +127,7 @@ export const CarDisplay: React.FC<CarDisplayProps> = ({
           />
         ) : (
           <Image
-            source={CAR_IMAGES[currentSkin]}
+            source={MASCOT_IMAGE}
             style={styles.carImage}
             contentFit="contain"
             cachePolicy="memory-disk"
@@ -203,26 +136,14 @@ export const CarDisplay: React.FC<CarDisplayProps> = ({
         )}
       </Animated.View>
 
-      {/* Bottom button */}
-      {vehicleId && (
+      {/* Add photo button */}
+      {vehicleId && !showPhoto && onAddPhotoPress && (
         <View style={styles.buttonContainer}>
-          {hasPhoto ? (
-            // Toggle button when photo exists
-            <GlassButton
-              onPress={onToggleMode || (() => {})}
-              icon="swap-horizontal-outline"
-              disabled={!onToggleMode}
-            />
-          ) : (
-            // Add photo button when no photo
-            onAddPhotoPress && (
-              <GlassButton
-                onPress={onAddPhotoPress}
-                icon="camera-outline"
-                label="Ajouter une photo"
-              />
-            )
-          )}
+          <GlassButton
+            onPress={onAddPhotoPress}
+            icon="camera-outline"
+            label="Ajouter une photo"
+          />
         </View>
       )}
     </View>

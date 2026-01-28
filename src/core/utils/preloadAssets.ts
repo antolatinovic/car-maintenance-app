@@ -7,8 +7,7 @@ import { Asset } from 'expo-asset';
 
 // All images to preload
 const images = [
-  require('../../../assets/cars/car-classic.png'),
-  require('../../../assets/cars/car-sport.png'),
+  require('../../../assets/Carly_Mascotte.png'),
   require('../../../assets/check-success.png'),
 ];
 

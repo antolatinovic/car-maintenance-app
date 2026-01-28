@@ -1,58 +1,19 @@
 /**
- * useVehiclePhoto - Hook for managing vehicle photo upload and display preference
+ * useVehiclePhoto - Hook for managing vehicle photo upload
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import * as ImagePicker from 'expo-image-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { uploadVehiclePhoto } from '@/services/vehiclePhotoService';
-import type { CarDisplayMode } from '@/core/types';
-import { CAR_DISPLAY_MODE_KEY, DEFAULT_CAR_DISPLAY_MODE } from '@/core/types';
 
 interface UseVehiclePhotoReturn {
   isUploading: boolean;
-  displayMode: CarDisplayMode;
-  setDisplayMode: (mode: CarDisplayMode) => Promise<boolean>;
   pickAndUploadPhoto: (vehicleId: string, onSuccess?: (url: string) => void) => Promise<string | null>;
-  toggleDisplayMode: () => Promise<void>;
 }
 
 export const useVehiclePhoto = (): UseVehiclePhotoReturn => {
   const [isUploading, setIsUploading] = useState(false);
-  const [displayMode, setDisplayModeState] = useState<CarDisplayMode>(DEFAULT_CAR_DISPLAY_MODE);
-
-  // Load display mode preference on mount
-  useEffect(() => {
-    const loadDisplayMode = async () => {
-      try {
-        const savedMode = await AsyncStorage.getItem(CAR_DISPLAY_MODE_KEY);
-        if (savedMode === 'photo' || savedMode === 'skin') {
-          setDisplayModeState(savedMode);
-        }
-      } catch (error) {
-        console.error('Error loading display mode:', error);
-      }
-    };
-
-    loadDisplayMode();
-  }, []);
-
-  const setDisplayMode = useCallback(async (mode: CarDisplayMode): Promise<boolean> => {
-    try {
-      await AsyncStorage.setItem(CAR_DISPLAY_MODE_KEY, mode);
-      setDisplayModeState(mode);
-      return true;
-    } catch (error) {
-      console.error('Error saving display mode:', error);
-      return false;
-    }
-  }, []);
-
-  const toggleDisplayMode = useCallback(async () => {
-    const newMode = displayMode === 'photo' ? 'skin' : 'photo';
-    await setDisplayMode(newMode);
-  }, [displayMode, setDisplayMode]);
 
   const pickAndUploadPhoto = useCallback(async (
     vehicleId: string,
@@ -91,9 +52,6 @@ export const useVehiclePhoto = (): UseVehiclePhotoReturn => {
         return null;
       }
 
-      // Switch to photo display mode after successful upload
-      await setDisplayMode('photo');
-
       // Call success callback
       if (uploadResult.data && onSuccess) {
         onSuccess(uploadResult.data);
@@ -107,13 +65,10 @@ export const useVehiclePhoto = (): UseVehiclePhotoReturn => {
     } finally {
       setIsUploading(false);
     }
-  }, [setDisplayMode]);
+  }, []);
 
   return {
     isUploading,
-    displayMode,
-    setDisplayMode,
     pickAndUploadPhoto,
-    toggleDisplayMode,
   };
 };

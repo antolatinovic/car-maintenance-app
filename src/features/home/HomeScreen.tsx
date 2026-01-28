@@ -42,7 +42,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { vehicle, maintenances, isLoading, refresh } = useHomeData();
-  const { isUploading, displayMode, pickAndUploadPhoto, toggleDisplayMode } = useVehiclePhoto();
+  const { isUploading, pickAndUploadPhoto } = useVehiclePhoto();
   const statusCards = useMaintenanceStatus(vehicle?.id, vehicle?.current_mileage ?? undefined);
 
   const userName = userProfile
@@ -87,10 +87,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       });
     }
   }, [vehicle?.id, pickAndUploadPhoto, refresh]);
-
-  const handleToggleDisplayMode = useCallback(() => {
-    toggleDisplayMode();
-  }, [toggleDisplayMode]);
 
   // Loading state
   if (isLoading) {
@@ -176,10 +172,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             height={280}
             vehicleId={vehicle.id}
             vehiclePhotoUrl={vehicle.photo_url}
-            displayMode={displayMode}
             isUploading={isUploading}
             onAddPhotoPress={handleAddVehiclePhoto}
-            onToggleMode={handleToggleDisplayMode}
           />
         </View>
 
