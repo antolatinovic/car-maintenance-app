@@ -1,11 +1,13 @@
 /**
  * Expense card component - displays a single expense with colored left border
+ * Uses glassmorphism styling (BlurView on iOS, translucent bg on Android)
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows, spacing, typography } from '@/core/theme';
+import { colors, spacing, typography } from '@/core/theme';
 import type { Expense, ExpenseType } from '@/core/types/database';
 
 interface ExpenseCardProps {
@@ -83,17 +85,15 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onPress, onLo
     return `${mileage.toLocaleString('fr-FR')} km`;
   };
 
-  return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={() => onPress(expense)}
-      onLongPress={() => onLongPress?.(expense)}
-      activeOpacity={0.7}
-    >
+  const cardContent = (
+    <>
       <View style={[styles.colorStripe, { backgroundColor: config.color }]} />
+      <View style={styles.topHighlight} />
 
-      <View style={[styles.iconContainer, { backgroundColor: `${config.color}20` }]}>
-        <Ionicons name={config.icon} size={24} color={config.color} />
+      <View style={styles.iconContainer}>
+        <View style={[styles.iconCircle, { backgroundColor: `${config.color}20` }]}>
+          <Ionicons name={config.icon} size={24} color={config.color} />
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -130,21 +130,61 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense, onPress, onLo
         color={colors.textTertiary}
         style={styles.chevron}
       />
+    </>
+  );
+
+  return (
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => onPress(expense)}
+      onLongPress={() => onLongPress?.(expense)}
+      activeOpacity={0.7}
+    >
+      {Platform.OS === 'ios' ? (
+        <BlurView intensity={20} tint="light" style={styles.blurContainer}>
+          <View style={[StyleSheet.absoluteFill, styles.glassOverlay]} />
+          {cardContent}
+        </BlurView>
+      ) : (
+        <View style={styles.androidContainer}>
+          {cardContent}
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    backgroundColor: colors.cardBackground,
-    borderRadius: spacing.cardRadius,
-    padding: spacing.m,
     marginHorizontal: spacing.screenPaddingHorizontal,
     marginBottom: spacing.m,
+    borderRadius: spacing.cardRadius,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  blurContainer: {
+    flexDirection: 'row',
+    padding: spacing.m,
     alignItems: 'center',
     overflow: 'hidden',
-    ...shadows.small,
+  },
+  glassOverlay: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  androidContainer: {
+    flexDirection: 'row',
+    padding: spacing.m,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  topHighlight: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
   },
   colorStripe: {
     position: 'absolute',
@@ -156,6 +196,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: spacing.cardRadius,
   },
   iconContainer: {
+    zIndex: 1,
+  },
+  iconCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
@@ -165,6 +208,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginLeft: spacing.m,
+    zIndex: 1,
   },
   header: {
     flexDirection: 'row',
@@ -207,5 +251,6 @@ const styles = StyleSheet.create({
   },
   chevron: {
     marginLeft: spacing.s,
+    zIndex: 1,
   },
 });

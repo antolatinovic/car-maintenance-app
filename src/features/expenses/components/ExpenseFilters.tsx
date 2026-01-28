@@ -1,9 +1,10 @@
 /**
- * Expense type filter chips with gradient selection
+ * Expense type filter chips with gradient selection and glass unselected state
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, gradients, spacing, typography } from '@/core/theme';
@@ -32,6 +33,31 @@ interface ExpenseFiltersProps {
 }
 
 export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({ selectedType, onSelectType }) => {
+  const renderDefaultChip = (option: FilterOption) => {
+    const chipContent = (
+      <>
+        <Ionicons name={option.icon} size={16} color={colors.textSecondary} />
+        <Text style={styles.chipText}>{option.label}</Text>
+      </>
+    );
+
+    if (Platform.OS === 'ios') {
+      return (
+        <View style={styles.chipGlassWrapper}>
+          <BlurView intensity={15} tint="light" style={styles.chip}>
+            {chipContent}
+          </BlurView>
+        </View>
+      );
+    }
+
+    return (
+      <View style={[styles.chip, styles.chipAndroid]}>
+        {chipContent}
+      </View>
+    );
+  };
+
   return (
     <ScrollView
       horizontal
@@ -57,10 +83,7 @@ export const ExpenseFilters: React.FC<ExpenseFiltersProps> = ({ selectedType, on
                 <Text style={[styles.chipText, styles.chipTextSelected]}>{option.label}</Text>
               </LinearGradient>
             ) : (
-              <View style={[styles.chip, styles.chipDefault]}>
-                <Ionicons name={option.icon} size={16} color={colors.textSecondary} />
-                <Text style={styles.chipText}>{option.label}</Text>
-              </View>
+              renderDefaultChip(option)
             )}
           </TouchableOpacity>
         );
@@ -82,9 +105,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     borderRadius: spacing.buttonRadiusSmall,
+    overflow: 'hidden',
   },
-  chipDefault: {
-    backgroundColor: colors.backgroundTertiary,
+  chipGlassWrapper: {
+    borderRadius: spacing.buttonRadiusSmall,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  chipAndroid: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
   },
   chipText: {
     ...typography.captionMedium,

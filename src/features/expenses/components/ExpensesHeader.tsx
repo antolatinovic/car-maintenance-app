@@ -79,7 +79,6 @@ export const ExpensesHeader: React.FC<ExpensesHeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.backgroundPrimary,
     paddingHorizontal: spacing.screenPaddingHorizontal,
     paddingBottom: spacing.m,
   },
@@ -128,7 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   addButton: {
     width: 44,

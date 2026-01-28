@@ -7,6 +7,7 @@ import { View, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '@/core/theme';
 import { getPrimaryVehicle } from '@/services/vehicleService';
+import { getDocuments } from '@/services/documentService';
 import { useExpenses } from './hooks';
 import {
   ExpensesHeader,
@@ -14,8 +15,9 @@ import {
   ExpenseList,
   ExpenseForm,
   BudgetSummaryCards,
+  ExpenseCurveChart,
 } from './components';
-import type { Expense, ExpenseType } from '@/core/types/database';
+import type { Document, Expense, ExpenseType } from '@/core/types/database';
 import type { CreateExpenseData } from '@/services/expenseService';
 
 interface ExpensesScreenProps {
@@ -28,6 +30,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onAnalyticsPress
   const [selectedType, setSelectedType] = useState<ExpenseType | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
   useEffect(() => {
     const fetchVehicle = async () => {
@@ -40,6 +43,17 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onAnalyticsPress
     };
     fetchVehicle();
   }, []);
+
+  useEffect(() => {
+    if (!vehicleId) return;
+    const fetchDocuments = async () => {
+      const result = await getDocuments(vehicleId);
+      if (result.data) {
+        setDocuments(result.data);
+      }
+    };
+    fetchDocuments();
+  }, [vehicleId]);
 
   const {
     expenses,
@@ -155,6 +169,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onAnalyticsPress
         onClearFilters={handleClearFilters}
         ListHeaderComponent={
           <>
+            <ExpenseCurveChart expenses={expenses} documents={documents} />
             <BudgetSummaryCards
               budgetSummary={budgetSummary}
               onSeeAll={onAnalyticsPress}
@@ -178,7 +193,7 @@ export const ExpensesScreen: React.FC<ExpensesScreenProps> = ({ onAnalyticsPress
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
   },
   centerContent: {
     flex: 1,
