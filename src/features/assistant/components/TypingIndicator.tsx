@@ -79,12 +79,14 @@ const styles = StyleSheet.create({
   bubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.cardBackground,
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
     borderRadius: spacing.cardRadiusSmall,
     borderBottomLeftRadius: spacing.xs,
     paddingHorizontal: spacing.l,
     paddingVertical: spacing.m,
     ...shadows.small,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   dot: {
     width: 8,

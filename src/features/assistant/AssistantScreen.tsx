@@ -5,7 +5,7 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { View, FlatList, StyleSheet, StatusBar, Alert, ListRenderItem } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing } from '@/core/theme';
+import { spacing } from '@/core/theme';
 import {
   AssistantHeader,
   ChatMessageBubble,
@@ -138,7 +138,7 @@ export const AssistantScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.backgroundPrimary} />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
 
       <View style={[styles.header, { paddingTop: insets.top }]}>
         <AssistantHeader onNewConversation={handleNewConversation} vehicleName={vehicleName} />
@@ -174,17 +174,17 @@ export const AssistantScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
   },
   header: {
-    backgroundColor: colors.backgroundPrimary,
+    backgroundColor: 'transparent',
   },
   messageList: {
     flex: 1,
   },
   messageListContent: {
     paddingVertical: spacing.m,
-    paddingBottom: 180, // Space for input + tabbar
+    paddingBottom: spacing.tabBarHeight + 120,
   },
   emptyListContent: {
     flex: 1,

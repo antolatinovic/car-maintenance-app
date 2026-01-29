@@ -4,8 +4,9 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, typography, shadows } from '@/core/theme';
+import { colors, gradients, spacing, typography, shadows } from '@/core/theme';
 import type { ChatMessage } from '../types';
 
 interface ChatMessageBubbleProps {
@@ -16,6 +17,49 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({ message })
   const isUser = message.role === 'user';
   const isStreaming = message.isStreaming;
 
+  const renderUserBubble = () => (
+    <LinearGradient
+      colors={gradients.violet}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[
+        styles.bubble,
+        styles.userBubble,
+        isStreaming && styles.streamingBubble,
+      ]}
+    >
+      <Text style={[styles.messageText, styles.userText]}>
+        {message.content || (isStreaming ? '...' : '')}
+      </Text>
+
+      {isStreaming && (
+        <View style={styles.cursorContainer}>
+          <View style={styles.cursor} />
+        </View>
+      )}
+    </LinearGradient>
+  );
+
+  const renderAssistantBubble = () => (
+    <View
+      style={[
+        styles.bubble,
+        styles.assistantBubble,
+        isStreaming && styles.streamingBubble,
+      ]}
+    >
+      <Text style={[styles.messageText, styles.assistantText]}>
+        {message.content || (isStreaming ? '...' : '')}
+      </Text>
+
+      {isStreaming && (
+        <View style={styles.cursorContainer}>
+          <View style={styles.cursor} />
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}>
       {!isUser && (
@@ -24,23 +68,7 @@ export const ChatMessageBubble: React.FC<ChatMessageBubbleProps> = ({ message })
         </View>
       )}
 
-      <View
-        style={[
-          styles.bubble,
-          isUser ? styles.userBubble : styles.assistantBubble,
-          isStreaming && styles.streamingBubble,
-        ]}
-      >
-        <Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
-          {message.content || (isStreaming ? '...' : '')}
-        </Text>
-
-        {isStreaming && (
-          <View style={styles.cursorContainer}>
-            <View style={styles.cursor} />
-          </View>
-        )}
-      </View>
+      {isUser ? renderUserBubble() : renderAssistantBubble()}
 
       {isUser && (
         <View style={[styles.avatarContainer, styles.userAvatar]}>
@@ -68,13 +96,17 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.backgroundTertiary,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: spacing.s,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   userAvatar: {
     backgroundColor: colors.accentPrimary,
+    borderWidth: 0,
+    borderColor: 'transparent',
   },
   bubble: {
     maxWidth: '75%',
@@ -84,12 +116,13 @@ const styles = StyleSheet.create({
     ...shadows.small,
   },
   userBubble: {
-    backgroundColor: colors.accentPrimary,
     borderBottomRightRadius: spacing.xs,
   },
   assistantBubble: {
-    backgroundColor: colors.cardBackground,
+    backgroundColor: 'rgba(255, 255, 255, 0.65)',
     borderBottomLeftRadius: spacing.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   streamingBubble: {
     opacity: 0.95,

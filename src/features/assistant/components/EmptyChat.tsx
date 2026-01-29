@@ -46,10 +46,10 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.backgroundTertiary,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: `${colors.accentPrimary}12`,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xxl,
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: spacing.xxxl,
+    maxWidth: 280,
   },
   suggestionsContainer: {
     width: '100%',

@@ -67,12 +67,14 @@ export const QuotaDisplay: React.FC<QuotaDisplayProps> = ({ quota }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.backgroundTertiary,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: spacing.cardRadiusSmall,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     marginHorizontal: spacing.screenPaddingHorizontal,
     marginBottom: spacing.m,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
   },
   infoRow: {
     flexDirection: 'row',
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 4,
-    backgroundColor: colors.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 2,
     overflow: 'hidden',
     marginRight: spacing.s,

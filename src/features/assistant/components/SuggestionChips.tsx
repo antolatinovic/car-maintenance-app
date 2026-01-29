@@ -48,14 +48,14 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.cardBackground,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: spacing.buttonRadiusSmall,
     paddingHorizontal: spacing.m,
     paddingVertical: spacing.s,
     maxWidth: '100%',
     ...shadows.small,
     borderWidth: 1,
-    borderColor: colors.borderLight,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
   },
   icon: {
     marginRight: spacing.s,
